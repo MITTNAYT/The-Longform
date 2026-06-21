@@ -1,0 +1,181 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // ===============================================================
+    // Assumed Data Model
+    // ===============================================================
+    //
+    // Collection: users
+    // Document ID: {userId}
+    // Fields:
+    //   - uid: string (required)
+    //   - displayName: string (required)
+    //   - photoURL: string (optional)
+    //   - email: string (required, private)
+    //   - bio: string (optional)
+    //   - createdAt: timestamp (required)
+    //
+    // Collection: posts
+    // Document ID: {postId}
+    // Fields:
+    //   - authorId: string (required)
+    //   - authorName: string (required)
+    //   - title: string (required)
+    //   - content: string (required)
+    //   - category: string (required, ['poetry', 'prose', 'essay'])
+    //   - createdAt: timestamp (required)
+    //   - updatedAt: timestamp (optional)
+    //   - isPublic: bool (required)
+    //
+    // ===============================================================
+
+    // ===============================================================
+    // Helper Functions
+    // ===============================================================
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    function isDocOwner() {
+      return isAuthenticated() && request.auth.uid == resource.data.authorId;
+    }
+
+    function isValidUser(data) {
+      return data.keys().hasAll(['uid', 'displayName', 'email', 'createdAt']) &&
+             data.uid is string && data.uid == request.auth.uid &&
+             data.displayName is string && data.displayName.size() > 0 && data.displayName.size() < 100 &&
+             data.email is string && data.email.matches("^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$") &&
+             data.createdAt is timestamp &&
+             (!('bio' in data) || (data.bio is string && data.bio.size() <= 500));
+    }
+
+    function isValidPost(data) {
+      return data.keys().hasAll(['authorId', 'authorName', 'title', 'content', 'category', 'createdAt', 'isPublic']) &&
+             data.authorId is string && data.authorId == request.auth.uid &&
+             data.authorName is string && data.authorName.size() > 0 && data.authorName.size() < 100 &&
+             data.title is string && data.title.size() > 0 && data.title.size() < 200 &&
+             data.content is string && data.content.size() > 0 && data.content.size() < 50000 &&
+             data.category in ['poetry', 'prose', 'essay', 'letter'] &&
+             data.createdAt is timestamp &&
+             data.isPublic is bool &&
+             (!('imageUrl' in data) || (data.imageUrl is string && data.imageUrl.size() < 1000)) &&
+             (!('likesCount' in data) || (data.likesCount is int && data.likesCount >= 0));
+    }
+
+    function isValidLike(data) {
+      return data.keys().hasAll(['uid', 'postId', 'createdAt']) &&
+             data.uid is string && data.uid == request.auth.uid &&
+             data.postId is string &&
+             data.createdAt is timestamp;
+    }
+
+    function isValidCounterUpdate(postId) {
+      // Allow update only if 'likesCount' is the ONLY field changing
+      return request.resource.data.diff(resource.data).affectedKeys().hasOnly(['likesCount']) &&
+             // And the change is exactly +1 or -1
+             math.abs(request.resource.data.likesCount - resource.data.likesCount) == 1 &&
+             // Verify consistency:
+             (
+               // Increment: Like must NOT exist before, but MUST exist after
+               (request.resource.data.likesCount > resource.data.likesCount &&
+                !exists(/databases/$(database)/documents/likes/$(request.auth.uid + '_' + postId)) &&
+                getAfter(/databases/$(database)/documents/likes/$(request.auth.uid + '_' + postId)) != null) ||
+               // Decrement: Like MUST exist before, but must NOT exist after
+               (request.resource.data.likesCount < resource.data.likesCount &&
+                exists(/databases/$(database)/documents/likes/$(request.auth.uid + '_' + postId)) &&
+                getAfter(/databases/$(database)/documents/likes/$(request.auth.uid + '_' + postId)) == null)
+             );
+    }
+
+    function isValidComment(data) {
+      return data.keys().hasAll(['postId', 'authorId', 'authorName', 'content', 'createdAt']) &&
+             data.postId is string &&
+             data.authorId is string && data.authorId == request.auth.uid &&
+             data.authorName is string && data.authorName.size() > 0 && data.authorName.size() < 100 &&
+             data.content is string && data.content.size() > 0 && data.content.size() < 2000 &&
+             data.createdAt is timestamp;
+    }
+
+    function isValidReport(data) {
+      return data.keys().hasAll(['postId', 'reporterId', 'reason', 'status', 'createdAt']) &&
+             data.postId is string &&
+             data.reporterId is string && data.reporterId == request.auth.uid &&
+             data.reason is string && data.reason.size() > 0 && data.reason.size() < 2000 &&
+             data.status == 'pending' &&
+             data.createdAt is timestamp;
+    }
+
+    function isAdmin() {
+      return isAuthenticated() &&
+        (get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin' ||
+          (request.auth.token.email == "mittnaytking@gmail.com" && request.auth.token.email_verified == true));
+    }
+
+    // ===============================================================
+    // Rules
+    // ===============================================================
+
+    match /users/{userId} {
+      // PII Protection: Only owner can read their own profile (contains email)
+      allow read: if isOwner(userId) || isAdmin();
+      allow create: if isOwner(userId) && isValidUser(request.resource.data);
+      allow update: if isOwner(userId) && isValidUser(request.resource.data) && 
+                      request.resource.data.email == resource.data.email &&
+                      request.resource.data.createdAt == resource.data.createdAt;
+    }
+
+    match /posts/{postId} {
+      // Public posts can be read by anyone. Private posts only by author.
+      allow read: if resource.data.isPublic == true || isDocOwner() || isAdmin();
+      allow create: if isAuthenticated() && isValidPost(request.resource.data);
+      allow update: if (isDocOwner() && isValidPost(request.resource.data) &&
+                      request.resource.data.authorId == resource.data.authorId &&
+                      request.resource.data.createdAt == resource.data.createdAt) ||
+                      (isAuthenticated() && isValidCounterUpdate(postId));
+      allow delete: if isDocOwner() || isAdmin();
+    }
+
+    match /likes/{likeId} {
+      allow read: if true;
+      allow create: if isAuthenticated() && isValidLike(request.resource.data) && likeId == request.auth.uid + '_' + request.resource.data.postId;
+      allow delete: if isAuthenticated() && resource.data.uid == request.auth.uid;
+    }
+
+    match /follows/{followId} {
+      allow read: if true;
+      allow create: if isAuthenticated() && 
+                      request.resource.data.followerId == request.auth.uid &&
+                      followId == request.auth.uid + '_' + request.resource.data.followingId;
+      allow delete: if isAuthenticated() && resource.data.followerId == request.auth.uid;
+    }
+
+    match /bookmarks/{bookmarkId} {
+      allow read: if isAuthenticated() && resource.data.uid == request.auth.uid;
+      allow create: if isAuthenticated() && 
+                      request.resource.data.uid == request.auth.uid &&
+                      bookmarkId == request.auth.uid + '_' + request.resource.data.postId;
+      allow delete: if isAuthenticated() && resource.data.uid == request.auth.uid;
+    }
+
+    match /comments/{commentId} {
+      allow read: if true; // Comments are public
+      allow create: if isAuthenticated() && isValidComment(request.resource.data);
+      allow update: if isAuthenticated() && request.auth.uid == resource.data.authorId && isValidComment(request.resource.data) &&
+                      request.resource.data.authorId == resource.data.authorId &&
+                      request.resource.data.postId == resource.data.postId &&
+                      request.resource.data.createdAt == resource.data.createdAt;
+      allow delete: if isAuthenticated() && (request.auth.uid == resource.data.authorId || isAdmin());
+    }
+
+    match /reports/{reportId} {
+      // Only admins can read or manage reports
+      allow read, update, delete: if isAdmin();
+      // Any authenticated user can create a report
+      allow create: if isAuthenticated() && isValidReport(request.resource.data);
+    }
+  }
+}
