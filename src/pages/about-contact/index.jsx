@@ -15,18 +15,18 @@ const AboutContact = () => {
   return (
     <>
       <Helmet>
-        <title>About Elena Rodriguez - Midnight Thoughts</title>
+        <title>About Ismail Ismail - The Longform.</title>
         <meta 
           name="description" 
-          content="Meet Elena Rodriguez, the writer behind Midnight Thoughts. Discover her story, writing philosophy, and connect through various channels for meaningful conversations." 
+          content="Meet Ismail Ismail, the writer behind The Longform. Discover his story, writing philosophy, and connect through various channels for meaningful conversations." 
         />
-        <meta name="keywords" content="Elena Rodriguez, writer, poet, midnight thoughts, about author, contact writer" />
-        <meta property="og:title" content="About Elena Rodriguez - Midnight Thoughts" />
-        <meta property="og:description" content="Meet the writer behind Midnight Thoughts and discover her journey of authentic expression and meaningful connection." />
+        <meta name="keywords" content="Ismail Ismail, writer, poet, longform, about author, contact writer" />
+        <meta property="og:title" content="About Ismail Ismail - The Longform." />
+        <meta property="og:description" content="Meet the writer behind The Longform and discover his journey of authentic expression and meaningful connection." />
         <meta property="og:type" content="profile" />
         <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:title" content="About Elena Rodriguez - Midnight Thoughts" />
-        <meta name="twitter:description" content="Meet the writer behind Midnight Thoughts and discover her journey of authentic expression." />
+        <meta name="twitter:title" content="About Ismail Ismail - The Longform." />
+        <meta name="twitter:description" content="Meet the writer behind The Longform and discover his journey of authentic expression." />
       </Helmet>
       <div className="min-h-screen bg-background">
         <Header />
@@ -66,7 +66,7 @@ const AboutContact = () => {
             <div className="max-w-4xl mx-auto text-center">
               <div className="flex items-center justify-center space-x-3 mb-6">
                 <Icon name="Moon" size={24} className="text-accent" />
-                <span className="font-heading font-semibold text-xl">Midnight Thoughts</span>
+                <span className="font-heading font-semibold text-xl">The Longform.</span>
               </div>
               
               <p className="text-primary-foreground/80 mb-6 leading-relaxed">
@@ -102,7 +102,7 @@ const AboutContact = () => {
               
               <div className="border-t border-primary-foreground/20 pt-6">
                 <p className="text-sm text-primary-foreground/60">
-                  © {new Date()?.getFullYear()} Midnight Thoughts. All rights reserved. | 
+                  © {new Date()?.getFullYear()} The Longform. All rights reserved. | 
                   <span className="ml-1">Made with ❤️ for fellow night thinkers</span>
                 </p>
               </div>

@@ -50,7 +50,7 @@ const NewsletterSignup = ({ className = '', variant = 'default' }) => {
             <Icon name="Check" size={24} className="text-success" />
           </div>
           <h3 className="font-heading font-semibold text-lg text-card-foreground mb-2">
-            Welcome to Midnight Thoughts!
+            Welcome to The Longform!
           </h3>
           <p className="text-muted-foreground text-sm">
             Thank you for subscribing. You'll receive our latest thoughts and stories directly in your inbox.

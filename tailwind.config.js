@@ -67,12 +67,14 @@ module.exports = {
         'text-secondary': 'var(--color-text-secondary)', /* muted-brown */
       },
       fontFamily: {
-        'heading': ['Playfair Display', 'serif'],
-        'body': ['Lato', 'sans-serif'],
-        'caption': ['Source Sans Pro', 'sans-serif'],
+        'heading': ['Playfair Display', 'Georgia', 'serif'],
+        'body': ['Inter', 'sans-serif'],
+        'lato': ['Inter', 'sans-serif'],
+        'playfair': ['Playfair Display', 'Georgia', 'serif'],
+        'caption': ['Inter', 'sans-serif'],
         'mono': ['JetBrains Mono', 'monospace'],
-        'sans': ['Lato', 'sans-serif'],
-        'serif': ['Playfair Display', 'serif'],
+        'sans': ['Inter', 'sans-serif'],
+        'serif': ['Playfair Display', 'Georgia', 'serif'],
       },
       fontSize: {
         'fluid-sm': 'clamp(0.875rem, 2vw, 1rem)',
@@ -104,6 +106,7 @@ module.exports = {
         'fade-in': 'fadeIn 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
         'slide-up': 'slideUp 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
         'slide-down': 'slideDown 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+        'float-dot': 'floatDot 3s ease-in-out infinite',
       },
       keyframes: {
         fadeIn: {
@@ -117,6 +120,10 @@ module.exports = {
         slideDown: {
           '0%': { opacity: '0', transform: 'translateY(-20px)' },
           '100%': { opacity: '1', transform: 'translateY(0)' },
+        },
+        floatDot: {
+          '0%, 100%': { transform: 'translateY(0px) scale(1)', opacity: '0.6' },
+          '50%': { transform: 'translateY(-8px) scale(1.15)', opacity: '1' },
         },
       },
       backdropBlur: {

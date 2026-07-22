@@ -31,7 +31,7 @@ const ConfirmationFlow = ({ subscription, onContinue }) => {
       </div>
       {/* Main Message */}
       <h2 className="font-heading font-semibold text-2xl text-foreground mb-4">
-        {subscription?.tier === 'supporter' ? 'Thank You for Your Support!' : 'Welcome to Midnight Thoughts!'}
+        {subscription?.tier === 'supporter' ? 'Thank You for Your Support!' : 'Welcome to The Longform!'}
       </h2>
       <p className="text-muted-foreground leading-relaxed mb-8">
         {welcomeMessage}

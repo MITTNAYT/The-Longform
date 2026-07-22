@@ -1,7 +1,5 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import Button from '../../../components/ui/Button';
-import Input from '../../../components/ui/Input';
 import Icon from '../../../components/AppIcon';
 
 const Footer = () => {
@@ -12,199 +10,179 @@ const Footer = () => {
   const handleNewsletterSubmit = async (e) => {
     e?.preventDefault();
     if (!newsletterEmail) return;
-
     setIsSubscribing(true);
-    
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1500));
-    
+    await new Promise(resolve => setTimeout(resolve, 1200));
     setSubscriptionSuccess(true);
     setNewsletterEmail('');
     setIsSubscribing(false);
-    
-    // Reset success message after 3 seconds
-    setTimeout(() => setSubscriptionSuccess(false), 3000);
+    setTimeout(() => setSubscriptionSuccess(false), 4000);
   };
 
-  const currentYear = new Date()?.getFullYear();
+  const currentYear = new Date().getFullYear();
 
   const footerLinks = {
     explore: [
-      { label: 'Latest Posts', href: '/homepage' },
-      { label: 'Categories', href: '/homepage' },
-      { label: 'Archives', href: '/homepage' },
-      { label: 'Search', href: '/homepage' }
+      { label: 'Latest Posts', href: '/' },
+      { label: 'Discover', href: '/discover' },
+      { label: 'Feed', href: '/feed' },
+      { label: 'Write', href: '/write' },
     ],
     connect: [
       { label: 'About', href: '/about-contact' },
       { label: 'Contact', href: '/about-contact' },
       { label: 'Subscribe', href: '/subscription-management' },
-      { label: 'RSS Feed', href: '/homepage' }
     ],
     legal: [
-      { label: 'Privacy Policy', href: '/homepage' },
-      { label: 'Terms of Service', href: '/homepage' },
-      { label: 'Cookie Policy', href: '/homepage' }
-    ]
+      { label: 'Privacy Policy', href: '#' },
+      { label: 'Terms of Service', href: '#' },
+    ],
   };
 
   const socialLinks = [
     { name: 'Twitter', icon: 'Twitter', href: '#' },
     { name: 'Instagram', icon: 'Instagram', href: '#' },
     { name: 'LinkedIn', icon: 'Linkedin', href: '#' },
-    { name: 'Email', icon: 'Mail', href: 'mailto:hello@midnightthoughts.com' }
   ];
 
   return (
-    <footer className="bg-card border-t border-border">
-      <div className="container mx-auto px-4 lg:px-8">
-        {/* Newsletter Section */}
-        <div className="py-12 border-b border-border">
-          <div className="max-w-2xl mx-auto text-center">
-            <h3 className="font-heading text-2xl font-bold text-card-foreground mb-3">
-              Never Miss a Midnight Thought
+    <footer className="border-t border-border/50 bg-card">
+      <div className="max-w-6xl mx-auto px-5 lg:px-8">
+        {/* Newsletter Bar */}
+        <div className="py-12 border-b border-border/40">
+          <div className="max-w-xl mx-auto text-center">
+            <div className="inline-flex items-center justify-center w-10 h-10 rounded-xl bg-accent/10 mb-5">
+              <Icon name="Mail" size={18} className="text-accent" />
+            </div>
+            <h3 className="font-heading text-2xl font-bold text-foreground mb-2">
+              Never Miss a Story
             </h3>
-            <p className="text-muted-foreground mb-6">
-              Get our latest reflections, poetry, and essays delivered to your inbox weekly.
+            <p className="text-muted-foreground text-sm mb-6 leading-relaxed">
+              Weekly reflections, poetry, and essays delivered straight to your inbox.
             </p>
-            
+
             {subscriptionSuccess ? (
-              <div className="flex items-center justify-center gap-2 text-success">
-                <Icon name="Check" size={20} />
-                <span>Thank you for subscribing!</span>
+              <div className="inline-flex items-center gap-2 text-success font-medium text-sm bg-success/10 px-4 py-2.5 rounded-full">
+                <Icon name="Check" size={16} />
+                <span>You're on the list — welcome!</span>
               </div>
             ) : (
-              <form onSubmit={handleNewsletterSubmit} className="flex flex-col sm:flex-row gap-3 max-w-md mx-auto">
-                <Input
+              <form onSubmit={handleNewsletterSubmit} className="flex gap-2 max-w-sm mx-auto">
+                <input
                   type="email"
-                  placeholder="Enter your email"
+                  placeholder="your@email.com"
                   value={newsletterEmail}
-                  onChange={(e) => setNewsletterEmail(e?.target?.value)}
+                  onChange={(e) => setNewsletterEmail(e.target.value)}
                   disabled={isSubscribing}
-                  className="flex-1"
+                  className="input-pro flex-1 !rounded-full !py-2.5"
                 />
-                <Button
+                <button
                   type="submit"
-                  variant="default"
-                  loading={isSubscribing}
                   disabled={isSubscribing || !newsletterEmail}
-                  iconName="Send"
-                  iconPosition="right"
+                  className="btn-primary flex-shrink-0 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  Subscribe
-                </Button>
+                  {isSubscribing ? (
+                    <Icon name="RefreshCw" size={14} className="animate-spin" />
+                  ) : (
+                    'Subscribe'
+                  )}
+                </button>
               </form>
             )}
           </div>
         </div>
 
-        {/* Main Footer Content */}
-        <div className="py-12">
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
-            {/* Brand Section */}
-            <div className="lg:col-span-1">
-              <Link to="/homepage" className="flex items-center gap-3 mb-4">
-                <Icon name="Moon" size={28} className="text-primary" />
-                <span className="font-heading font-bold text-xl text-card-foreground">
-                  Midnight Thoughts
-                </span>
-              </Link>
-              <p className="text-muted-foreground text-sm mb-6 leading-relaxed">
-                A sanctuary for intimate reflections, poetry, and essays that emerge in the quiet hours when the world sleeps and souls speak.
-              </p>
-              
-              {/* Social Links */}
-              <div className="flex items-center gap-3">
-                {socialLinks?.map((social) => (
-                  <Button
-                    key={social?.name}
-                    variant="ghost"
-                    size="icon"
-                    className="h-9 w-9"
-                    asChild
-                  >
-                    <a href={social?.href} target="_blank" rel="noopener noreferrer">
-                      <Icon name={social?.icon} size={18} />
-                    </a>
-                  </Button>
-                ))}
+        {/* Main footer grid */}
+        <div className="py-12 grid md:grid-cols-2 lg:grid-cols-4 gap-8 lg:gap-10">
+          {/* Brand */}
+          <div className="lg:col-span-1">
+            <Link to="/" className="flex items-center gap-2 mb-4 group">
+              <div className="w-7 h-7 rounded-lg bg-primary flex items-center justify-center">
+                <Icon name="Moon" size={14} className="text-primary-foreground" />
               </div>
+              <span className="font-heading font-bold text-lg text-foreground">
+                The Longform<span className="text-accent">.</span>
+              </span>
+            </Link>
+            <p className="text-sm text-muted-foreground leading-relaxed mb-5">
+              A sanctuary for intimate reflections and essays that emerge in the quiet hours when the world sleeps.
+            </p>
+            <div className="flex items-center gap-2">
+              {socialLinks.map((social) => (
+                <a
+                  key={social.name}
+                  href={social.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label={social.name}
+                  className="w-8 h-8 rounded-lg border border-border/60 flex items-center justify-center text-muted-foreground hover:text-foreground hover:border-accent/40 hover:bg-muted/50 transition-all duration-150"
+                >
+                  <Icon name={social.icon} size={14} />
+                </a>
+              ))}
             </div>
+          </div>
 
-            {/* Explore Links */}
-            <div>
-              <h4 className="font-heading font-semibold text-card-foreground mb-4">
-                Explore
-              </h4>
-              <ul className="space-y-3">
-                {footerLinks?.explore?.map((link) => (
-                  <li key={link?.label}>
-                    <Link
-                      to={link?.href}
-                      className="text-muted-foreground hover:text-card-foreground transition-colors duration-200 text-sm"
-                    >
-                      {link?.label}
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            </div>
+          {/* Explore */}
+          <div>
+            <h4 className="text-xs font-semibold uppercase tracking-[0.1em] text-muted-foreground/70 mb-4">Explore</h4>
+            <ul className="space-y-3">
+              {footerLinks.explore.map((link) => (
+                <li key={link.label}>
+                  <Link to={link.href} className="text-sm text-muted-foreground hover:text-foreground transition-colors duration-150">
+                    {link.label}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
 
-            {/* Connect Links */}
-            <div>
-              <h4 className="font-heading font-semibold text-card-foreground mb-4">
-                Connect
-              </h4>
-              <ul className="space-y-3">
-                {footerLinks?.connect?.map((link) => (
-                  <li key={link?.label}>
-                    <Link
-                      to={link?.href}
-                      className="text-muted-foreground hover:text-card-foreground transition-colors duration-200 text-sm"
-                    >
-                      {link?.label}
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            </div>
+          {/* Connect */}
+          <div>
+            <h4 className="text-xs font-semibold uppercase tracking-[0.1em] text-muted-foreground/70 mb-4">Connect</h4>
+            <ul className="space-y-3">
+              {footerLinks.connect.map((link) => (
+                <li key={link.label}>
+                  <Link to={link.href} className="text-sm text-muted-foreground hover:text-foreground transition-colors duration-150">
+                    {link.label}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
 
-            {/* Legal Links */}
-            <div>
-              <h4 className="font-heading font-semibold text-card-foreground mb-4">
-                Legal
-              </h4>
-              <ul className="space-y-3">
-                {footerLinks?.legal?.map((link) => (
-                  <li key={link?.label}>
-                    <Link
-                      to={link?.href}
-                      className="text-muted-foreground hover:text-card-foreground transition-colors duration-200 text-sm"
-                    >
-                      {link?.label}
-                    </Link>
-                  </li>
-                ))}
-              </ul>
+          {/* Legal */}
+          <div>
+            <h4 className="text-xs font-semibold uppercase tracking-[0.1em] text-muted-foreground/70 mb-4">Legal</h4>
+            <ul className="space-y-3">
+              {footerLinks.legal.map((link) => (
+                <li key={link.label}>
+                  <Link to={link.href} className="text-sm text-muted-foreground hover:text-foreground transition-colors duration-150">
+                    {link.label}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+
+            {/* Stats */}
+            <div className="mt-6 p-3 rounded-xl bg-muted/40 border border-border/40">
+              <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                <Icon name="Users" size={12} />
+                <span><strong className="text-foreground font-semibold">2,847</strong> subscribers</span>
+              </div>
             </div>
           </div>
         </div>
 
-        {/* Bottom Bar */}
-        <div className="py-6 border-t border-border">
-          <div className="flex flex-col md:flex-row items-center justify-between gap-4">
-            <p className="text-muted-foreground text-sm">
-              © {currentYear} Midnight Thoughts. All rights reserved.
-            </p>
-            
-            <div className="flex items-center gap-6 text-sm text-muted-foreground">
-              <span>Made with ❤️ for thoughtful readers</span>
-              <div className="flex items-center gap-1">
-                <Icon name="Users" size={14} />
-                <span>2,847 subscribers</span>
-              </div>
-            </div>
-          </div>
+        {/* Bottom bar */}
+        <div className="py-5 border-t border-border/40 flex flex-col sm:flex-row items-center justify-between gap-3">
+          <p className="text-xs text-muted-foreground">
+            © {currentYear} The Longform. All rights reserved.
+          </p>
+          <p className="text-xs text-muted-foreground flex items-center gap-1">
+            Made with
+            <span className="text-rose-400 mx-0.5">♥</span>
+            for thoughtful readers
+          </p>
         </div>
       </div>
     </footer>

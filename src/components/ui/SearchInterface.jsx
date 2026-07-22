@@ -1,9 +1,11 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 import Button from './Button';
 import Input from './Input';
 import Icon from '../AppIcon';
 
 const SearchInterface = ({ className = '' }) => {
+  const navigate = useNavigate();
   const [isExpanded, setIsExpanded] = useState(false);
   const [query, setQuery] = useState('');
   const [suggestions, setSuggestions] = useState([]);
@@ -84,7 +86,7 @@ const SearchInterface = ({ className = '' }) => {
   };
 
   const handleSuggestionClick = (post) => {
-    console.log('Navigate to post:', post);
+    navigate('/preview/post');
     setIsExpanded(false);
     setQuery('');
     setSuggestions([]);

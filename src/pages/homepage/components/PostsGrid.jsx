@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import PostCard from './PostCard';
-import Button from '../../../components/ui/Button';
 import Icon from '../../../components/AppIcon';
 
 const PostsGrid = () => {
@@ -11,128 +10,139 @@ const PostsGrid = () => {
       id: 2,
       title: "Midnight Musings on Love",
       excerpt: "When the world sleeps, hearts speak their truest language. Tonight I write about the love that exists in silence, in stolen glances, in the space between words that say everything we cannot.",
-      author: "Elena Rodriguez",
+      author: "Ismail Ismail",
       publishedAt: "2025-01-08",
       readingTime: 5,
       category: "Poetry",
-      image: "https://images.pexels.com/photos/1261728/pexels-photo-1261728.jpeg?w=400&h=300&fit=crop"
+      image: "https://images.pexels.com/photos/1261728/pexels-photo-1261728.jpeg?w=600&h=400&fit=crop"
     },
     {
       id: 3,
       title: "Letters to My Younger Self",
-      excerpt: "If I could whisper across time to the girl I once was, sitting in her childhood bedroom dreaming of tomorrow, what would I say? Perhaps that the path isn't straight, but it's beautiful.",
-      author: "Elena Rodriguez",
+      excerpt: "If I could whisper across time to the boy I once was, sitting in his childhood bedroom dreaming of tomorrow, what would I say? Perhaps that the path isn't straight, but it's beautiful.",
+      author: "Ismail Ismail",
       publishedAt: "2025-01-05",
       readingTime: 7,
       category: "Personal",
-      image: "https://images.pixabay.com/photo/2016/11/29/05/45/astronomy-1867616_1280.jpg?w=400&h=300&fit=crop"
+      image: "https://images.unsplash.com/photo-1455390582262-044cdead277a?w=600&h=400&fit=crop"
     },
     {
       id: 4,
       title: "The Weight of Words",
       excerpt: "Every word carries the weight of intention, the gravity of meaning. In this digital age where words fly faster than thoughts, I pause to consider the responsibility we bear as wielders of language.",
-      author: "Elena Rodriguez",
+      author: "Ismail Ismail",
       publishedAt: "2025-01-03",
       readingTime: 6,
       category: "Writing",
-      image: "https://images.unsplash.com/photo-1455390582262-044cdead277a?w=400&h=300&fit=crop"
+      image: "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=600&h=400&fit=crop"
     },
     {
       id: 5,
       title: "Dancing with Shadows",
       excerpt: "In darkness, we find our light. This poem explores the beauty of embracing our shadows, the parts of ourselves we often hide, and discovering that wholeness comes from accepting all facets of our being.",
-      author: "Elena Rodriguez",
+      author: "Ismail Ismail",
       publishedAt: "2025-01-01",
       readingTime: 4,
       category: "Poetry",
-      image: "https://images.pexels.com/photos/1261728/pexels-photo-1261728.jpeg?w=400&h=300&fit=crop"
+      image: "https://images.pexels.com/photos/1261728/pexels-photo-1261728.jpeg?w=600&h=400&fit=crop"
     },
     {
       id: 6,
       title: "The Quiet Revolution",
       excerpt: "Change begins in whispers, in the quiet moments when we decide to be different. This reflection on personal transformation explores how the most profound revolutions happen within.",
-      author: "Elena Rodriguez",
+      author: "Ismail Ismail",
       publishedAt: "2024-12-28",
       readingTime: 8,
       category: "Reflection",
-      image: "https://images.pixabay.com/photo/2016/11/29/05/45/astronomy-1867616_1280.jpg?w=400&h=300&fit=crop"
+      image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=600&h=400&fit=crop"
     },
     {
       id: 7,
       title: "Conversations with the Moon",
       excerpt: "Each night, I find myself in dialogue with the moon, sharing secrets that daylight cannot hold. These nocturnal conversations have become my most honest form of prayer.",
-      author: "Elena Rodriguez",
+      author: "Ismail Ismail",
       publishedAt: "2024-12-25",
       readingTime: 5,
       category: "Poetry",
-      image: "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400&h=300&fit=crop"
+      image: "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=600&h=400&fit=crop"
     },
     {
       id: 8,
       title: "The Art of Letting Go",
       excerpt: "Release is not abandonment; it's trust. In learning to let go, we discover that some things are meant to flow through our lives like water, leaving us changed but not empty.",
-      author: "Elena Rodriguez",
+      author: "Ismail Ismail",
       publishedAt: "2024-12-22",
       readingTime: 6,
       category: "Personal",
-      image: "https://images.pexels.com/photos/1261728/pexels-photo-1261728.jpeg?w=400&h=300&fit=crop"
+      image: "https://images.pexels.com/photos/1261728/pexels-photo-1261728.jpeg?w=600&h=400&fit=crop"
     },
     {
       id: 9,
       title: "Fragments of Memory",
       excerpt: "Memory is not a photograph but a painting, each recollection adding new brushstrokes to the canvas of our past. Tonight I explore how our memories shape and reshape themselves.",
-      author: "Elena Rodriguez",
+      author: "Ismail Ismail",
       publishedAt: "2024-12-20",
       readingTime: 7,
       category: "Reflection",
-      image: "https://images.pixabay.com/photo/2016/11/29/05/45/astronomy-1867616_1280.jpg?w=400&h=300&fit=crop"
+      image: "https://images.unsplash.com/photo-1455390582262-044cdead277a?w=600&h=400&fit=crop"
     }
   ];
 
   const loadMorePosts = () => {
-    setVisiblePosts(prev => Math.min(prev + 3, posts?.length));
+    setVisiblePosts(prev => Math.min(prev + 3, posts.length));
   };
 
   return (
-    <section className="py-12 lg:py-16">
-      <div className="container mx-auto px-4 lg:px-8">
-        <div className="flex items-center justify-between mb-8">
-          <h2 className="font-heading text-2xl lg:text-3xl font-bold text-foreground">
-            Latest Thoughts
-          </h2>
-          <Button variant="ghost" iconName="Rss" iconPosition="left">
+    <section className="py-14 lg:py-20">
+      <div className="max-w-6xl mx-auto px-5 lg:px-8">
+        {/* Section Header */}
+        <div className="flex items-center justify-between mb-10">
+          <div className="flex items-center gap-3">
+            <div className="w-5 h-5 rounded-md bg-foreground/8 flex items-center justify-center">
+              <Icon name="Feather" size={11} className="text-muted-foreground" />
+            </div>
+            <h2 className="font-heading text-2xl lg:text-3xl font-bold text-foreground">
+              Latest Thoughts
+            </h2>
+          </div>
+          <button className="text-xs text-muted-foreground hover:text-foreground flex items-center gap-1.5 transition-colors font-medium">
+            <Icon name="Rss" size={13} />
             RSS Feed
-          </Button>
+          </button>
         </div>
 
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
-          {posts?.slice(0, visiblePosts)?.map((post) => (
-            <PostCard key={post?.id} post={post} />
+        {/* Feed List */}
+        <div className="space-y-4">
+          {posts.slice(0, visiblePosts).map((post) => (
+            <PostCard key={post.id} post={post} />
           ))}
         </div>
 
-        {visiblePosts < posts?.length && (
+        {/* Load More */}
+        {visiblePosts < posts.length && (
           <div className="text-center mt-12">
-            <Button 
-              variant="outline" 
-              size="lg"
+            <button
               onClick={loadMorePosts}
-              iconName="ChevronDown"
-              iconPosition="right"
+              className="inline-flex items-center gap-2 px-6 py-3 rounded-full border border-border/80 text-sm font-medium text-foreground hover:bg-muted/40 hover:border-accent/30 transition-all duration-200"
             >
-              Load More Posts
-            </Button>
+              Load more posts
+              <Icon name="ChevronDown" size={15} />
+            </button>
           </div>
         )}
 
-        {visiblePosts >= posts?.length && (
-          <div className="text-center mt-12 p-8 bg-muted/30 rounded-lg">
-            <Icon name="BookOpen" size={32} className="text-muted-foreground mx-auto mb-3" />
-            <p className="text-muted-foreground">
-              You've reached the end of our latest thoughts. 
-              <Button variant="link" className="ml-1">
-                Browse the archives
-              </Button>
+        {/* End state */}
+        {visiblePosts >= posts.length && (
+          <div className="text-center mt-14">
+            <div className="divider-ornament text-xs text-muted-foreground/60">
+              <span className="px-4 font-medium tracking-wider">You're all caught up</span>
+            </div>
+            <p className="text-sm text-muted-foreground mt-4">
+              Discover more in the{' '}
+              <a href="/discover" className="text-accent hover:text-accent/80 font-medium transition-colors">
+                explore section
+              </a>
+              .
             </p>
           </div>
         )}

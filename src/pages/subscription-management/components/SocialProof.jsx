@@ -11,7 +11,7 @@ const SocialProof = () => {
   const testimonials = [
     {
       id: 1,
-      content: `"The depth and vulnerability in these midnight thoughts always leaves me reflecting long after I've finished reading. It's like having a thoughtful conversation with a dear friend."`,
+      content: `"The depth and vulnerability in these longform essays always leaves me reflecting long after I've finished reading. It's like having a thoughtful conversation with a dear friend."`,
       author: 'Sarah Chen',
       role: 'Supporter since 2023',
       avatar: 'https://images.unsplash.com/photo-1494790108755-2616b612b786?w=64&h=64&fit=crop&crop=face'

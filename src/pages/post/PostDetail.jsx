@@ -1,0 +1,565 @@
+import React, { useState, useEffect, useCallback } from 'react';
+import { Link, useParams, useNavigate } from 'react-router-dom';
+import { useSelector, useDispatch } from 'react-redux';
+import { selectUser } from '../../store/authSlice';
+import { selectIsFollowing, toggleSubscription } from '../../store/subscriptionsSlice';
+import {
+  fetchPostBySlug,
+  likePost, unlikePost, hasLiked,
+  bookmarkPost, unbookmarkPost,
+  fetchComments, addComment
+} from '../../lib/queries';
+import { MarkdownRenderer } from '../../lib/markdown';
+import Icon from '../../components/AppIcon';
+
+// ─── Like Button ─────────────────────────────────────────────
+const LikeButton = ({ postId, userId }) => {
+  const [liked, setLiked] = useState(false);
+  const [count, setCount] = useState(0);
+  const [busy, setBusy] = useState(false);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (!postId || !userId) return;
+    hasLiked(userId, postId).then(result => setLiked(result));
+  }, [postId, userId]);
+
+  const handleToggle = async () => {
+    if (!userId) { navigate('/auth/login'); return; }
+    if (busy) return;
+    setBusy(true);
+    const wasLiked = liked;
+    setLiked(!wasLiked);
+    setCount(c => wasLiked ? c - 1 : c + 1);
+    try {
+      if (wasLiked) await unlikePost(userId, postId);
+      else await likePost(userId, postId);
+    } catch {
+      setLiked(wasLiked);
+      setCount(c => wasLiked ? c + 1 : c - 1);
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  return (
+    <button
+      onClick={handleToggle}
+      className={`flex items-center gap-2 px-4 py-2 rounded-full border text-sm font-medium font-lato transition-all duration-200 ${
+        liked
+          ? 'bg-rose-50 border-rose-200 text-rose-600'
+          : 'border-stone-200 text-stone-600 hover:border-rose-200 hover:text-rose-500'
+      }`}
+    >
+      <Icon name={liked ? 'Heart' : 'Heart'} size={16} className={liked ? 'fill-rose-500 text-rose-500' : ''} />
+      {count > 0 && <span>{count}</span>}
+      <span>{liked ? 'Liked' : 'Like'}</span>
+    </button>
+  );
+};
+
+// ─── Bookmark Button ─────────────────────────────────────────
+const BookmarkButton = ({ postId, userId }) => {
+  const [saved, setSaved] = useState(false);
+  const [busy, setBusy] = useState(false);
+  const navigate = useNavigate();
+
+  const handleToggle = async () => {
+    if (!userId) { navigate('/auth/login'); return; }
+    if (busy) return;
+    setBusy(true);
+    const wasSaved = saved;
+    setSaved(!wasSaved);
+    try {
+      if (wasSaved) await unbookmarkPost(userId, postId);
+      else await bookmarkPost(userId, postId);
+    } catch {
+      setSaved(wasSaved);
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  return (
+    <button
+      onClick={handleToggle}
+      className={`flex items-center gap-2 px-4 py-2 rounded-full border text-sm font-medium font-lato transition-all duration-200 ${
+        saved
+          ? 'bg-amber-50 border-amber-200 text-amber-600'
+          : 'border-stone-200 text-stone-600 hover:border-amber-200 hover:text-amber-500'
+      }`}
+    >
+      <Icon name="Bookmark" size={16} className={saved ? 'fill-amber-500 text-amber-500' : ''} />
+      <span>{saved ? 'Saved' : 'Save'}</span>
+    </button>
+  );
+};
+
+// ─── Comments Section ─────────────────────────────────────────
+const CommentsSection = ({ postId, currentUser }) => {
+  const [comments, setComments] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [newComment, setNewComment] = useState('');
+  const [replyTo, setReplyTo] = useState(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    async function load() {
+      setIsLoading(true);
+      const { data } = await fetchComments(postId);
+      setComments(data || []);
+      setIsLoading(false);
+    }
+    if (postId) load();
+  }, [postId]);
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!currentUser) { navigate('/auth/login'); return; }
+    if (!newComment.trim() || isSubmitting) return;
+
+    setIsSubmitting(true);
+    try {
+      const { data, error } = await addComment({
+        postId,
+        userId: currentUser.id,
+        content: newComment.trim(),
+        parentId: replyTo?.id || null
+      });
+      if (error) throw error;
+
+      // Optimistically add the new comment to state
+      const optimisticComment = {
+        ...data,
+        profiles: {
+          username: currentUser.username,
+          display_name: currentUser.display_name,
+          avatar_url: currentUser.avatar_url
+        }
+      };
+      setComments(prev => [...prev, optimisticComment]);
+      setNewComment('');
+      setReplyTo(null);
+    } catch (err) {
+      console.error('Failed to post comment:', err);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  // Build tree from flat list
+  const topLevel = comments.filter(c => !c.parent_id);
+  const getReplies = (parentId) => comments.filter(c => c.parent_id === parentId);
+
+  const CommentItem = ({ comment, depth = 0 }) => {
+    const replies = getReplies(comment.id);
+    const avatar = comment.profiles?.avatar_url ||
+      `https://ui-avatars.com/api/?name=${encodeURIComponent(comment.profiles?.display_name || 'User')}&background=e7e5e4&color=44403c&size=40`;
+
+    return (
+      <div className={`${depth > 0 ? 'ml-8 border-l-2 border-stone-100 pl-4' : ''}`}>
+        <div className="flex gap-3 mb-3">
+          <img src={avatar} alt={comment.profiles?.display_name} className="w-8 h-8 rounded-full flex-shrink-0 mt-1 object-cover" />
+          <div className="flex-1 min-w-0">
+            <div className="bg-stone-50 border border-stone-200 rounded-lg p-3">
+              <div className="flex items-center gap-2 mb-1">
+                <span className="text-sm font-medium text-stone-900 font-lato">{comment.profiles?.display_name || 'Anonymous'}</span>
+                <span className="text-xs text-stone-400">{new Date(comment.created_at).toLocaleDateString()}</span>
+              </div>
+              <p className="text-sm text-stone-700 font-lato leading-relaxed">{comment.content}</p>
+            </div>
+            <button
+              onClick={() => setReplyTo(comment)}
+              className="mt-1 ml-1 text-xs text-stone-400 hover:text-stone-600 font-lato transition-colors"
+            >
+              Reply
+            </button>
+          </div>
+        </div>
+        {replies.map(r => <CommentItem key={r.id} comment={r} depth={depth + 1} />)}
+      </div>
+    );
+  };
+
+  return (
+    <div className="mt-16 pt-12 border-t border-stone-200">
+      <h2 className="font-playfair font-bold text-2xl text-stone-900 mb-8">
+        {comments.length} Comment{comments.length !== 1 ? 's' : ''}
+      </h2>
+
+      {/* Comment Form */}
+      <form onSubmit={handleSubmit} className="mb-8">
+        {replyTo && (
+          <div className="flex items-center gap-2 mb-2 text-sm text-stone-500 font-lato">
+            <Icon name="CornerDownRight" size={14} />
+            <span>Replying to <strong>{replyTo.profiles?.display_name}</strong></span>
+            <button type="button" onClick={() => setReplyTo(null)} className="text-stone-400 hover:text-stone-600 ml-1">
+              <Icon name="X" size={12} />
+            </button>
+          </div>
+        )}
+        <div className="flex gap-3">
+          <img
+            src={currentUser?.avatar_url ||
+              `https://ui-avatars.com/api/?name=${encodeURIComponent(currentUser?.display_name || 'You')}&background=e7e5e4&color=44403c&size=40`}
+            alt="You"
+            className="w-9 h-9 rounded-full flex-shrink-0 object-cover"
+          />
+          <div className="flex-1 flex flex-col gap-2">
+            <textarea
+              value={newComment}
+              onChange={e => setNewComment(e.target.value)}
+              placeholder={currentUser ? 'Leave a thoughtful comment...' : 'Sign in to comment'}
+              disabled={!currentUser || isSubmitting}
+              rows={3}
+              className="w-full px-3 py-2 border border-stone-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-stone-400 font-lato text-sm resize-none disabled:opacity-60 disabled:bg-stone-50"
+            />
+            <div className="flex justify-end">
+              <button
+                type="submit"
+                disabled={!currentUser || !newComment.trim() || isSubmitting}
+                className="px-4 py-2 text-sm font-medium text-white bg-stone-900 rounded-md hover:bg-stone-800 font-lato disabled:opacity-40 flex items-center gap-2 transition-colors"
+              >
+                {isSubmitting && <Icon name="RefreshCw" size={14} className="animate-spin" />}
+                {currentUser ? 'Post comment' : 'Sign in to comment'}
+              </button>
+            </div>
+          </div>
+        </div>
+      </form>
+
+      {/* Comment List */}
+      {isLoading ? (
+        <p className="text-stone-400 text-sm font-lato animate-pulse">Loading comments...</p>
+      ) : topLevel.length === 0 ? (
+        <div className="text-center py-10 text-stone-400 font-lato text-sm">
+          <Icon name="MessageSquare" size={32} className="mx-auto mb-2 opacity-30" />
+          <p>No comments yet. Be the first to share your thoughts.</p>
+        </div>
+      ) : (
+        <div className="space-y-4">
+          {topLevel.map(c => <CommentItem key={c.id} comment={c} />)}
+        </div>
+      )}
+    </div>
+  );
+};
+
+// ─── Main Post Detail Page ─────────────────────────────────────
+const PostDetail = () => {
+  const { slug } = useParams();
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
+  const currentUser = useSelector(selectUser);
+
+  const [post, setPost] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  const isFollowing = useSelector(state =>
+    post?.author_id ? selectIsFollowing(state, post.author_id) : false
+  );
+  const [isTogglingFollow, setIsTogglingFollow] = useState(false);
+
+  const MOCK_POSTS = {
+    'art-of-solitude': {
+      id: 'mock-1',
+      title: 'The Art of Solitude: Finding Peace in Quiet Moments',
+      category: 'Reflection',
+      tags: ['Solitude', 'Mindfulness', 'Essays'],
+      author_username: 'ismail',
+      author_display_name: 'Ismail Ismail',
+      author_bio: 'Independent essayist, author of Quiet Horizons and contributor to The Longform.',
+      published_at: '2025-01-20T10:00:00Z',
+      reading_time: 8,
+      content: `In a world that never stops talking, we've forgotten the profound beauty of silence. Solitude isn't loneliness—it is an intimate, long-overdue conversation with our deepest selves.
+
+### The Modern Noise Paradox
+
+We wake up to alarm notifications, commute with podcasts in our ears, and fall asleep scrolling through algorithmic feeds. We have engineered out the empty spaces of our days. But it is precisely in those empty spaces where original thought flourishes.
+
+> "All of humanity's problems stem from man's inability to sit quietly in a room alone." — Blaise Pascal
+
+When you step away from the hum of external validation, something extraordinary happens. The dust settles. The chatter clears. You begin to hear the quiet rhythm of your own intuition.
+
+### Practicing Solitude in Daily Life
+
+Solitude does not require retreating to a cabin in the woods for six months. It begins with simple, intentional choices:
+
+1. **The Morning Sanctum**: Spend the first 20 minutes of your day without screens. Let your thoughts wander freely before the world demands your attention.
+2. **Silent Walks**: Leave your headphones behind. Observe the world around you with unmediated curiosity.
+3. **Journaling without Judgment**: Write down thoughts without editing or preparing them for an audience.
+
+As we reclaim solitude, we regain our capacity for depth, clarity, and genuine connection with others.`
+    },
+    'architecture-of-silence': {
+      id: 'mock-2',
+      title: 'The Architecture of Deep Silence',
+      category: 'Philosophy',
+      tags: ['Architecture', 'Silence', 'Focus'],
+      author_username: 'ismail',
+      author_display_name: 'Ismail Ismail',
+      author_bio: 'Independent essayist, author of Quiet Horizons and contributor to The Longform.',
+      published_at: '2025-01-18T14:30:00Z',
+      reading_time: 6,
+      content: `Silence is not merely the absence of sound; it is a physical space we construct through intentional design and boundary-setting.
+
+### Designing Quiet Spaces
+
+In traditional Japanese architecture, the concept of *Ma* (negative space) is as vital as the structural beams holding up the ceiling. The empty space allows room for reflection and breath.
+
+When we examine our modern digital work environments, we find almost zero negative space. Notifications pierce through focus, and open-plan offices amplify acoustic chaos. Re-architecting our environments for silence requires:
+
+- Setting strict digital office hours.
+- Designating non-negotiable deep-work blocks.
+- Cultivating physical environments with minimal visual clutter.`
+    },
+    'reclaiming-attention': {
+      id: 'mock-3',
+      title: 'On Reclaiming Attention in an Economy of Noise',
+      category: 'Culture',
+      tags: ['Attention', 'Digital Wellbeing', 'Society'],
+      author_username: 'marcus',
+      author_display_name: 'Marcus Vance',
+      author_bio: 'Culture critic and editor writing on tech, society, and cognitive sovereignty.',
+      published_at: '2025-01-16T09:15:00Z',
+      reading_time: 12,
+      content: `Your attention is the most valuable commodity on Earth. Tech giants deploy hyper-optimized machine learning models to capture every fraction of a second you spend online.
+
+### The Attention Extraction Paradigm
+
+Every refresh, scroll, and notification is engineered to trigger dopamine loops. When our attention is fragmented into 15-second intervals, our ability to engage in complex reasoning, deep reading, and long-term planning is eroded.
+
+To reclaim cognitive sovereignty, we must transition from passive consumption to intentional curation.`
+    },
+    'midnight-musings-on-love': {
+      id: 'mock-4',
+      title: 'Midnight Musings on Love',
+      category: 'Poetry',
+      tags: ['Poetry', 'Love', 'Night'],
+      author_username: 'ismail',
+      author_display_name: 'Ismail Ismail',
+      author_bio: 'Independent essayist, author of Quiet Horizons and contributor to The Longform.',
+      published_at: '2025-01-08T22:00:00Z',
+      reading_time: 5,
+      content: `When the world sleeps, hearts speak their truest language. Tonight I write about the love that exists in silence, in stolen glances, in the space between words that say everything we cannot.
+
+*The quiet hours hold no secrets,*
+*Only the soft echo of remembered laughter,*
+*And the steady warmth of a presence*
+*That needs no proof, no performance, no pretense.*`
+    }
+  };
+
+  useEffect(() => {
+    async function load() {
+      setIsLoading(true);
+      const { data, error: err } = await fetchPostBySlug(slug);
+      if (data) {
+        setPost(data);
+      } else if (MOCK_POSTS[slug]) {
+        setPost(MOCK_POSTS[slug]);
+      } else {
+        // Fallback generic article using slug formatting
+        const formattedTitle = slug ? slug.replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase()) : 'Untitled Essay';
+        setPost({
+          id: `mock-${slug}`,
+          title: formattedTitle,
+          category: 'Essay',
+          tags: ['Longform', 'Literature', 'Reflections'],
+          author_username: 'ismail',
+          author_display_name: 'Ismail Ismail',
+          author_bio: 'Independent essayist, author of Quiet Horizons and contributor to The Longform.',
+          published_at: new Date().toISOString(),
+          reading_time: 7,
+          content: `Welcome to this essay on **The Longform.**
+
+### Reflections on Depth and Discourse
+
+Great writing is an invitation to slow down. In an era characterized by brevity and instant reactions, longform prose offers space for nuance, complexity, and deliberate contemplation.
+
+> "Reading is to the mind what exercise is to the body." — Joseph Addison
+
+### The Core Thesis
+
+1. **Depth over Speed**: Meaningful ideas take time to formulate and assimilate.
+2. **Clarity over Noise**: Quality curation protects our mental landscape.
+3. **Community over Algorithms**: Human connection flourishes around shared appreciation for ideas.
+
+Thank you for reading this issue on The Longform.`
+        });
+      }
+      setIsLoading(false);
+    }
+    if (slug) load();
+  }, [slug]);
+
+  const handleFollowAuthor = async () => {
+    if (!currentUser) { navigate('/auth/login'); return; }
+    if (!post || isTogglingFollow) return;
+    setIsTogglingFollow(true);
+    try {
+      await dispatch(toggleSubscription({
+        subscriberId: currentUser.id,
+        authorId: post.author_id,
+        isFollowing
+      })).unwrap();
+    } finally {
+      setIsTogglingFollow(false);
+    }
+  };
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <p className="font-lato text-muted-foreground animate-pulse">Loading post...</p>
+      </div>
+    );
+  }
+
+  if (error || !post) {
+    return (
+      <div className="min-h-screen bg-background flex flex-col items-center justify-center p-4">
+        <Icon name="FileX" size={48} className="text-muted-foreground opacity-40 mb-4" />
+        <h2 className="text-2xl font-heading font-black mb-2">Post Not Found</h2>
+        <p className="text-muted-foreground mb-6">This post may have been moved or removed.</p>
+        <button onClick={() => navigate('/discover')} className="text-stone-900 underline font-lato">
+          Browse all posts
+        </button>
+      </div>
+    );
+  }
+
+  const authorAvatar = post.author_avatar_url ||
+    `https://ui-avatars.com/api/?name=${encodeURIComponent(post.author_display_name || post.author_username)}&background=e7e5e4&color=44403c&size=80`;
+  const publishedDate = post.published_at
+    ? new Date(post.published_at).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })
+    : '';
+
+  return (
+    <div className="min-h-screen bg-background text-foreground">
+      {/* Minimal Top Bar */}
+      <header className="sticky top-0 z-40 bg-background/80 backdrop-blur-md border-b border-border/50 py-3">
+        <div className="max-w-3xl mx-auto px-4 flex items-center justify-between">
+          <Link to={currentUser ? '/feed' : '/discover'} className="font-heading text-xl font-black text-foreground hover:opacity-80 transition-opacity">
+            The <span className="text-primary">Longform</span>
+          </Link>
+          <div className="flex items-center gap-3">
+            <BookmarkButton postId={post.id} userId={currentUser?.id} />
+            {currentUser ? (
+              <Link to={`/@${currentUser.username}`}>
+                <img
+                  src={currentUser.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(currentUser.display_name || currentUser.username)}&background=random`}
+                  alt="Profile"
+                  className="w-8 h-8 rounded-full border border-border ring-2 ring-primary/20"
+                />
+              </Link>
+            ) : (
+              <Link to="/auth/login" className="text-sm font-medium text-stone-600 hover:text-stone-900 font-lato">Sign in</Link>
+            )}
+          </div>
+        </div>
+      </header>
+
+      {/* Article */}
+      <article className="max-w-3xl mx-auto px-4 py-10 md:py-16">
+
+        {/* Category + Tags */}
+        <div className="flex flex-wrap gap-2 mb-6">
+          {post.category && (
+            <span className="px-2.5 py-1 bg-muted rounded text-xs uppercase font-bold tracking-wider text-muted-foreground">
+              {post.category}
+            </span>
+          )}
+          {post.tags?.map(tag => (
+            <span key={tag} className="px-2.5 py-1 bg-muted/60 border border-border/50 rounded-full text-xs text-muted-foreground font-lato">
+              #{tag}
+            </span>
+          ))}
+        </div>
+
+        {/* Title */}
+        <h1 className="font-heading text-4xl md:text-5xl font-black leading-tight mb-6 text-foreground">
+          {post.title}
+        </h1>
+
+        {/* Author Row */}
+        <div className="flex items-center justify-between flex-wrap gap-4 mb-10 pb-8 border-b border-border/40">
+          <Link to={`/@${post.author_username}`} className="flex items-center gap-3 group">
+            <img src={authorAvatar} alt={post.author_display_name} className="w-10 h-10 rounded-full object-cover" />
+            <div>
+              <p className="font-medium text-foreground group-hover:text-primary transition-colors font-lato">
+                {post.author_display_name || post.author_username}
+              </p>
+              <p className="text-xs text-muted-foreground font-lato">{publishedDate} · {post.reading_time || 1} min read</p>
+            </div>
+          </Link>
+          {currentUser && currentUser.id !== post.author_id && (
+            <button
+              onClick={handleFollowAuthor}
+              disabled={isTogglingFollow}
+              className={`px-4 py-1.5 rounded-full text-sm font-medium font-lato border transition-all duration-200 ${
+                isFollowing
+                  ? 'border-stone-300 text-stone-600 hover:border-red-200 hover:text-red-500'
+                  : 'border-stone-900 bg-stone-900 text-white hover:bg-stone-700'
+              }`}
+            >
+              {isFollowing ? 'Following' : 'Follow'}
+            </button>
+          )}
+        </div>
+
+        {/* Content */}
+        <MarkdownRenderer content={post.content || ''} />
+
+        {/* Engagement Bar */}
+        <div className="flex items-center gap-3 mt-12 pt-8 border-t border-border/40 flex-wrap">
+          <LikeButton postId={post.id} userId={currentUser?.id} />
+          <BookmarkButton postId={post.id} userId={currentUser?.id} />
+          <button
+            onClick={() => {
+              navigator.clipboard.writeText(window.location.href);
+              alert('Link copied!');
+            }}
+            className="flex items-center gap-2 px-4 py-2 rounded-full border border-stone-200 text-stone-600 hover:border-stone-400 text-sm font-medium font-lato transition-all"
+          >
+            <Icon name="Share2" size={16} />
+            Share
+          </button>
+        </div>
+
+        {/* Author Card */}
+        <div className="mt-12 p-6 bg-muted/20 border border-border/40 rounded-xl flex flex-col sm:flex-row items-start gap-4">
+          <img src={authorAvatar} alt={post.author_display_name} className="w-14 h-14 rounded-full object-cover flex-shrink-0" />
+          <div className="flex-1 min-w-0">
+            <Link to={`/@${post.author_username}`} className="font-heading font-bold text-xl text-foreground hover:text-primary transition-colors block mb-1">
+              {post.author_display_name || post.author_username}
+            </Link>
+            <p className="text-sm text-muted-foreground font-lato mb-4 leading-relaxed">
+              {post.author_bio || 'Writer on The Longform.'}
+            </p>
+            {currentUser && currentUser.id !== post.author_id && (
+              <button
+                onClick={handleFollowAuthor}
+                disabled={isTogglingFollow}
+                className={`px-5 py-2 rounded-full text-sm font-medium font-lato border transition-all duration-200 ${
+                  isFollowing
+                    ? 'border-stone-300 text-stone-600'
+                    : 'border-stone-900 bg-stone-900 text-white hover:bg-stone-700'
+                }`}
+              >
+                {isFollowing ? 'Following' : 'Follow'}
+              </button>
+            )}
+          </div>
+        </div>
+
+        {/* Comments */}
+        <CommentsSection postId={post.id} currentUser={currentUser} />
+      </article>
+    </div>
+  );
+};
+
+export default PostDetail;

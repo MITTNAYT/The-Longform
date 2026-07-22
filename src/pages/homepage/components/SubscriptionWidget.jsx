@@ -27,7 +27,7 @@ const SubscriptionWidget = () => {
     },
     {
       id: 'supporter',
-      name: 'Midnight Supporter',
+      name: 'Longform Supporter',
       price: '$5',
       period: 'month',
       features: [
@@ -196,7 +196,7 @@ const SubscriptionWidget = () => {
       </p>
       <div className="mt-4 pt-4 border-t border-border text-center">
         <p className="text-xs text-muted-foreground">
-          Join 2,847 readers who find solace in midnight musings
+          Join 2,847 readers who find solace in longform essays
         </p>
       </div>
     </div>

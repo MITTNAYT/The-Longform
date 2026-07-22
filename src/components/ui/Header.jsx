@@ -1,177 +1,210 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
+import { useSelector, useDispatch } from 'react-redux';
+import { selectIsAuthenticated, selectProfile, signOut } from '../../store/authSlice';
 import Icon from '../AppIcon';
-import Button from './Button';
 
 const Header = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [isDarkMode, setIsDarkMode] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
-  const location = useLocation();
 
-  const navigationItems = [
-    { label: 'Home', path: '/homepage', icon: 'Home' },
-    { label: 'About', path: '/about-contact', icon: 'User' },
-    { label: 'Subscribe', path: '/subscription-management', icon: 'Crown' }
+  const location = useLocation();
+  const dispatch = useDispatch();
+
+  const isAuthenticated = useSelector(selectIsAuthenticated);
+  const profile = useSelector(selectProfile);
+
+  const mainNavigation = [
+    { label: 'Feed', path: '/feed' },
+    { label: 'Discover', path: '/discover' },
+  ];
+
+  const authNavigation = [
+    { label: 'Bookmarks', path: '/bookmarks' },
+    { label: 'Write', path: '/write', highlight: true },
   ];
 
   useEffect(() => {
-    const savedTheme = localStorage.getItem('theme');
-    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)')?.matches;
-    const shouldUseDark = savedTheme === 'dark' || (!savedTheme && prefersDark);
-    
-    setIsDarkMode(shouldUseDark);
-    document.documentElement?.setAttribute('data-theme', shouldUseDark ? 'dark' : 'light');
-  }, []);
-
-  useEffect(() => {
-    const handleScroll = () => {
-      setIsScrolled(window.scrollY > 20);
-    };
-
-    window.addEventListener('scroll', handleScroll);
+    const handleScroll = () => setIsScrolled(window.scrollY > 12);
+    window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  const toggleDarkMode = () => {
-    const newMode = !isDarkMode;
-    setIsDarkMode(newMode);
-    localStorage.setItem('theme', newMode ? 'dark' : 'light');
-    document.documentElement?.setAttribute('data-theme', newMode ? 'dark' : 'light');
+  const closeMobileMenu = () => setIsMobileMenuOpen(false);
+
+  const isActivePath = (path) => location?.pathname === path;
+
+  const handleSignOut = () => {
+    dispatch(signOut());
+    closeMobileMenu();
   };
 
-  const toggleMobileMenu = () => {
-    setIsMobileMenuOpen(!isMobileMenuOpen);
-  };
-
-  const closeMobileMenu = () => {
-    setIsMobileMenuOpen(false);
-  };
-
-  const isActivePath = (path) => {
-    return location?.pathname === path;
-  };
+  const navItems = isAuthenticated
+    ? [...mainNavigation, ...authNavigation]
+    : mainNavigation;
 
   return (
-    <header 
+    <header
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-        isScrolled 
-          ? 'bg-background/95 backdrop-blur-sm border-b border-border shadow-gentle' 
-          : 'bg-transparent'
+        isScrolled
+          ? 'bg-card/95 backdrop-blur-xl border-b border-border shadow-sm py-3'
+          : 'bg-card/80 backdrop-blur-md border-b border-border/50 py-4'
       }`}
     >
-      <div className="container mx-auto px-4 lg:px-8">
-        <div className="flex items-center justify-between h-16 lg:h-20">
-          {/* Logo */}
-          <Link 
-            to="/homepage" 
-            className="flex items-center space-x-3 group transition-transform duration-200 hover:scale-105"
-            onClick={closeMobileMenu}
-          >
-            <div className="relative">
-              <Icon 
-                name="Moon" 
-                size={32} 
-                className="text-primary group-hover:text-accent transition-colors duration-200" 
-              />
-              <div className="absolute -top-1 -right-1 w-2 h-2 bg-accent rounded-full opacity-60"></div>
-            </div>
-            <span className="font-heading font-semibold text-xl lg:text-2xl text-foreground group-hover:text-primary transition-colors duration-200">
-              Midnight Thoughts
+      <div className="max-w-7xl mx-auto px-6 lg:px-10">
+        <div className="flex items-center justify-between">
+          {/* Left: Brand + Edition Tag */}
+          <div className="flex items-center gap-4">
+            <Link
+              to="/"
+              className="flex items-center gap-2.5 group"
+              onClick={closeMobileMenu}
+            >
+              <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center flex-shrink-0 group-hover:scale-105 transition-transform">
+                <Icon name="Feather" size={16} className="text-primary-foreground" />
+              </div>
+              <span className="font-heading font-extrabold text-2xl text-foreground tracking-tight leading-none">
+                The Longform<span className="text-accent">.</span>
+              </span>
+            </Link>
+            <span className="hidden sm:inline-block px-2.5 py-1 rounded-full bg-muted text-[11px] font-semibold text-muted-foreground tracking-wider uppercase">
+              Issue #42
             </span>
-          </Link>
+          </div>
 
-          {/* Desktop Navigation */}
-          <nav className="hidden md:flex items-center space-x-8">
-            {navigationItems?.map((item) => (
+          {/* Center Nav */}
+          <nav className="hidden md:flex items-center gap-1 bg-muted/60 p-1 rounded-full border border-border/60">
+            {navItems.map((item) => (
               <Link
-                key={item?.path}
-                to={item?.path}
-                className={`relative px-3 py-2 text-sm font-medium transition-all duration-200 group ${
-                  isActivePath(item?.path)
-                    ? 'text-primary' :'text-foreground hover:text-primary'
+                key={item.path}
+                to={item.path}
+                className={`relative px-4 py-1.5 text-xs font-semibold rounded-full transition-all duration-200 ${
+                  item.highlight
+                    ? 'bg-accent text-accent-foreground shadow-sm ml-1'
+                    : isActivePath(item.path)
+                    ? 'text-foreground bg-card shadow-sm'
+                    : 'text-muted-foreground hover:text-foreground'
                 }`}
               >
-                <span className="relative z-10">{item?.label}</span>
-                {isActivePath(item?.path) && (
-                  <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-accent rounded-full"></div>
+                {item.highlight && (
+                  <Icon name="PenTool" size={12} className="inline mr-1.5 -mt-0.5" />
                 )}
-                <div className="absolute inset-0 bg-accent/10 rounded-lg scale-0 group-hover:scale-100 transition-transform duration-200"></div>
+                {item.label}
               </Link>
             ))}
           </nav>
 
-          {/* Desktop Actions */}
-          <div className="hidden md:flex items-center space-x-4">
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={toggleDarkMode}
-              className="relative overflow-hidden"
+          {/* Desktop Right Actions */}
+          <div className="hidden md:flex items-center gap-3">
+            <button
+              className="w-9 h-9 rounded-full bg-muted/60 hover:bg-muted flex items-center justify-center text-muted-foreground hover:text-foreground transition-all"
+              aria-label="Search"
             >
-              <Icon 
-                name={isDarkMode ? "Sun" : "Moon"} 
-                size={20} 
-                className="transition-transform duration-300"
-              />
-            </Button>
-          </div>
+              <Icon name="Search" size={15} />
+            </button>
 
-          {/* Mobile Menu Button */}
-          <div className="md:hidden flex items-center space-x-2">
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={toggleDarkMode}
-              className="relative overflow-hidden"
-            >
-              <Icon 
-                name={isDarkMode ? "Sun" : "Moon"} 
-                size={20} 
-                className="transition-transform duration-300"
-              />
-            </Button>
-            
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={toggleMobileMenu}
-              className="relative"
-            >
-              <Icon 
-                name={isMobileMenuOpen ? "X" : "Menu"} 
-                size={24} 
-                className="transition-transform duration-200"
-              />
-            </Button>
-          </div>
-        </div>
-
-        {/* Mobile Navigation Menu */}
-        <div 
-          className={`md:hidden transition-all duration-300 ease-gentle ${
-            isMobileMenuOpen 
-              ? 'max-h-96 opacity-100 visible' :'max-h-0 opacity-0 invisible'
-          }`}
-        >
-          <nav className="py-4 border-t border-border bg-background/95 backdrop-blur-sm">
-            <div className="space-y-2">
-              {navigationItems?.map((item) => (
+            {isAuthenticated ? (
+              <div className="flex items-center gap-3">
                 <Link
-                  key={item?.path}
-                  to={item?.path}
-                  onClick={closeMobileMenu}
-                  className={`flex items-center space-x-3 px-4 py-3 text-base font-medium transition-all duration-200 ${
-                    isActivePath(item?.path)
-                      ? 'text-primary bg-accent/10 border-r-2 border-accent' :'text-foreground hover:text-primary hover:bg-muted/50'
-                  }`}
+                  to="/preview/profile"
+                  className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors group"
                 >
-                  <Icon name={item?.icon} size={20} />
-                  <span>{item?.label}</span>
+                  <div className="w-8 h-8 rounded-full bg-muted overflow-hidden flex items-center justify-center border border-border group-hover:border-accent transition-colors shadow-sm">
+                    {profile?.avatar_url ? (
+                      <img src={profile.avatar_url} alt="Profile" className="w-full h-full object-cover" />
+                    ) : (
+                      <span className="text-xs font-bold text-foreground">
+                        {(profile?.username || 'U')[0].toUpperCase()}
+                      </span>
+                    )}
+                  </div>
                 </Link>
-              ))}
-            </div>
+                <button
+                  onClick={handleSignOut}
+                  className="text-xs font-semibold text-muted-foreground hover:text-foreground px-3 py-1.5 rounded-full hover:bg-muted transition-all"
+                >
+                  Sign out
+                </button>
+              </div>
+            ) : (
+              <div className="flex items-center gap-2">
+                <Link
+                  to="/auth/login"
+                  className="text-xs font-semibold text-muted-foreground hover:text-foreground px-3.5 py-2 rounded-full hover:bg-muted transition-all"
+                >
+                  Sign in
+                </Link>
+                <Link
+                  to="/auth/signup"
+                  className="px-4 py-2 bg-primary text-primary-foreground text-xs font-bold rounded-full hover:opacity-90 transition-all shadow-sm"
+                >
+                  Subscribe
+                </Link>
+              </div>
+            )}
+          </div>
+
+          {/* Mobile Menu Toggle */}
+          <button
+            className="md:hidden w-8 h-8 flex items-center justify-center rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted/60 transition-all"
+            onClick={() => setIsMobileMenuOpen((p) => !p)}
+            aria-label="Toggle menu"
+          >
+            <Icon name={isMobileMenuOpen ? 'X' : 'Menu'} size={20} />
+          </button>
+        </div>
+      </div>
+
+      {/* Mobile Menu */}
+      <div
+        className={`md:hidden transition-all duration-300 ease-in-out overflow-hidden ${
+          isMobileMenuOpen ? 'max-h-[420px] opacity-100' : 'max-h-0 opacity-0'
+        }`}
+      >
+        <div className="border-t border-border/60 bg-background/98 backdrop-blur-xl">
+          <nav className="px-4 py-3 space-y-0.5">
+            {navItems.map((item) => (
+              <Link
+                key={item.path}
+                to={item.path}
+                onClick={closeMobileMenu}
+                className={`flex items-center gap-3 px-3 py-2.5 text-sm font-medium rounded-xl transition-all ${
+                  isActivePath(item.path)
+                    ? 'text-foreground bg-muted'
+                    : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'
+                }`}
+              >
+                {item.label}
+              </Link>
+            ))}
           </nav>
+          <div className="px-4 pb-4 pt-2 border-t border-border/40">
+            {isAuthenticated ? (
+              <div className="flex items-center gap-3">
+                <Link to="/preview/profile" onClick={closeMobileMenu} className="flex items-center gap-2 text-sm text-muted-foreground">
+                  <div className="w-7 h-7 rounded-full bg-muted border border-border flex items-center justify-center text-xs font-semibold">
+                    {(profile?.username || 'U')[0].toUpperCase()}
+                  </div>
+                  <span>{profile?.username}</span>
+                </Link>
+                <button
+                  onClick={handleSignOut}
+                  className="ml-auto text-sm text-red-500 hover:text-red-600 font-medium px-3 py-1.5"
+                >
+                  Sign out
+                </button>
+              </div>
+            ) : (
+              <div className="flex gap-2">
+                <Link to="/auth/login" onClick={closeMobileMenu} className="flex-1 text-center py-2.5 text-sm font-medium border border-border rounded-xl text-foreground hover:bg-muted/50 transition-colors">
+                  Sign in
+                </Link>
+                <Link to="/auth/signup" onClick={closeMobileMenu} className="flex-1 text-center py-2.5 text-sm font-semibold bg-primary text-primary-foreground rounded-xl hover:opacity-90 transition-opacity">
+                  Get started
+                </Link>
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </header>

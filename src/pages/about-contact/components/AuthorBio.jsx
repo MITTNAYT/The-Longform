@@ -12,7 +12,7 @@ const AuthorBio = () => {
     {
       icon: "Award",
       title: "Literary Awards",
-      description: "Winner of 2023 Midnight Writers Prize"
+      description: "Winner of 2023 Longform Writers Prize"
     },
     {
       icon: "Users",
@@ -35,8 +35,8 @@ const AuthorBio = () => {
             <div className="relative inline-block mb-8">
               <div className="w-32 h-32 lg:w-40 lg:h-40 mx-auto rounded-full overflow-hidden border-4 border-accent/20 shadow-warm">
                 <Image
-                  src="https://images.unsplash.com/photo-1494790108755-2616b612b786?w=400&h=400&fit=crop&crop=face"
-                  alt="Elena Rodriguez - Author of Midnight Thoughts"
+                  src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=400&fit=crop&crop=face"
+                  alt="Ismail Ismail - Author of The Longform."
                   className="w-full h-full object-cover"
                 />
               </div>
@@ -46,10 +46,10 @@ const AuthorBio = () => {
             </div>
             
             <h1 className="font-heading font-bold text-3xl lg:text-4xl text-foreground mb-4">
-              Elena Rodriguez
+              Ismail Ismail
             </h1>
             <p className="text-lg text-muted-foreground font-medium">
-              Writer, Poet & Midnight Philosopher
+              Writer, Poet & Longform Essayist
             </p>
           </div>
 
@@ -62,7 +62,7 @@ const AuthorBio = () => {
               
               <div className="space-y-6 text-card-foreground leading-relaxed">
                 <p>
-                  Welcome to my corner of the digital world, where thoughts bloom in the quiet hours and words find their way to paper when the rest of the world sleeps. I'm Elena, and I've been writing by moonlight for over a decade.
+                  Welcome to my corner of the digital world, where thoughts bloom in the quiet hours and words find their way to paper when the rest of the world sleeps. I'm Ismail, and I've been writing by moonlight for over a decade.
                 </p>
                 
                 <p>
@@ -70,7 +70,7 @@ const AuthorBio = () => {
                 </p>
                 
                 <p>
-                  I believe in the power of vulnerability in writing—that our shared struggles, dreams, and midnight revelations connect us across distances and differences. Through Midnight Thoughts, I've found a community of fellow night owls and deep thinkers who understand that some truths can only be spoken in whispers.
+                  I believe in the power of vulnerability in writing—that our shared struggles, dreams, and midnight revelations connect us across distances and differences. Through The Longform., I've found a community of fellow night owls and deep thinkers who understand that some truths can only be spoken in whispers.
                 </p>
                 
                 <blockquote className="border-l-4 border-accent pl-6 italic text-muted-foreground my-8">

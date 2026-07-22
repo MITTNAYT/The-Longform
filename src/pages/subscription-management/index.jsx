@@ -146,10 +146,10 @@ const SubscriptionManagement = () => {
   return (
     <>
       <Helmet>
-        <title>Subscription Management - Midnight Thoughts</title>
+        <title>Subscription Management - The Longform.</title>
         <meta name="description" content="Join our community of thoughtful readers. Choose between free weekly updates or become a supporter for exclusive content and early access." />
         <meta name="keywords" content="subscription, newsletter, blog, writing, community, support" />
-        <meta property="og:title" content="Subscription Management - Midnight Thoughts" />
+        <meta property="og:title" content="Subscription Management - The Longform." />
         <meta property="og:description" content="Support independent writing and join our community of thoughtful readers." />
         <meta property="og:type" content="website" />
       </Helmet>
@@ -209,7 +209,7 @@ const SubscriptionManagement = () => {
         <footer className="bg-card border-t border-border py-8">
           <div className="container mx-auto px-4 lg:px-8">
             <div className="text-center text-muted-foreground text-sm">
-              <p>&copy; {new Date()?.getFullYear()} Midnight Thoughts. All rights reserved.</p>
+              <p>&copy; {new Date()?.getFullYear()} The Longform. All rights reserved.</p>
               <div className="flex justify-center space-x-6 mt-4">
                 <a href="/privacy" className="hover:text-foreground transition-colors duration-200">
                   Privacy Policy

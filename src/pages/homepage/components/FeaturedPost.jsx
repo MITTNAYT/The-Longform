@@ -1,94 +1,104 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import Image from '../../../components/AppImage';
-import Button from '../../../components/ui/Button';
 import Icon from '../../../components/AppIcon';
 
 const FeaturedPost = () => {
   const featuredPost = {
     id: 1,
     title: "The Art of Solitude: Finding Peace in Quiet Moments",
-    excerpt: `In a world that never stops talking, we've forgotten the profound beauty of silence. This evening, as I sit by my window watching the city lights flicker like distant stars, I'm reminded of how solitude isn't loneliness—it's a conversation with our deepest selves.\n\nThere's something magical about the hours between midnight and dawn, when the world holds its breath and allows us to hear our own thoughts clearly. In these moments, we discover truths that daylight often obscures...`,
-    author: "Elena Rodriguez",
+    excerpt: `In a world that never stops talking, we've forgotten the profound beauty of silence. This evening, as I sit by my window watching the city lights flicker like distant stars, I'm reminded of how solitude isn't loneliness—it's a conversation with our deepest selves.`,
+    author: "Ismail Ismail",
+    authorAvatar: "II",
     publishedAt: "2025-01-10",
     readingTime: 8,
     category: "Reflection",
-    image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=800&h=400&fit=crop&crop=center",
-    isPinned: true
+    image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=900&h=600&fit=crop&crop=center",
   };
 
   return (
-    <section className="py-12 lg:py-16 bg-card border-y border-border">
-      <div className="container mx-auto px-4 lg:px-8">
-        <div className="flex items-center gap-3 mb-8">
-          <Icon name="Pin" size={20} className="text-accent" />
-          <span className="text-sm font-caption text-accent uppercase tracking-wide">Featured Post</span>
+    <section className="py-14 lg:py-20 border-y border-border/50">
+      <div className="max-w-6xl mx-auto px-5 lg:px-8">
+        {/* Section label */}
+        <div className="flex items-center gap-3 mb-10">
+          <div className="w-5 h-5 rounded-md bg-accent/15 flex items-center justify-center">
+            <Icon name="Pin" size={11} className="text-accent" />
+          </div>
+          <span className="text-xs font-semibold uppercase tracking-[0.12em] text-accent">Featured Essay</span>
+          <div className="flex-1 h-px bg-border/50" />
         </div>
 
-        <article className="grid lg:grid-cols-2 gap-8 lg:gap-12 items-center">
-          <div className="order-2 lg:order-1">
-            <div className="flex items-center gap-4 mb-4">
-              <span className="text-xs font-caption text-accent bg-accent/10 px-3 py-1 rounded-full">
-                {featuredPost?.category}
+        <article className="grid lg:grid-cols-5 gap-10 lg:gap-16 items-center">
+          {/* Text column */}
+          <div className="lg:col-span-3 order-2 lg:order-1">
+            {/* Meta */}
+            <div className="flex flex-wrap items-center gap-2.5 mb-5">
+              <span className="badge-accent">{featuredPost.category}</span>
+              <span className="text-muted-foreground/40 text-xs">·</span>
+              <span className="text-xs text-muted-foreground font-medium">
+                {new Date(featuredPost.publishedAt).toLocaleDateString('en-US', {
+                  year: 'numeric', month: 'long', day: 'numeric'
+                })}
               </span>
-              <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                <Icon name="Calendar" size={14} />
-                <time dateTime={featuredPost?.publishedAt}>
-                  {new Date(featuredPost.publishedAt)?.toLocaleDateString('en-US', {
-                    year: 'numeric',
-                    month: 'long',
-                    day: 'numeric'
-                  })}
-                </time>
-              </div>
-              <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                <Icon name="Clock" size={14} />
-                <span>{featuredPost?.readingTime} min read</span>
-              </div>
+              <span className="text-muted-foreground/40 text-xs">·</span>
+              <span className="text-xs text-muted-foreground font-medium">{featuredPost.readingTime} min read</span>
             </div>
 
-            <h2 className="font-heading text-2xl lg:text-3xl font-bold text-card-foreground mb-4 leading-tight">
-              {featuredPost?.title}
+            {/* Title */}
+            <h2 className="font-heading text-3xl lg:text-4xl font-bold text-foreground leading-tight mb-5">
+              {featuredPost.title}
             </h2>
 
-            <div className="prose prose-lg text-muted-foreground mb-6 leading-relaxed">
-              {featuredPost?.excerpt?.split('\n\n')?.map((paragraph, index) => (
-                <p key={index} className="mb-4 last:mb-0">
-                  {paragraph}
-                </p>
-              ))}
-            </div>
+            {/* Excerpt */}
+            <p className="text-base text-muted-foreground leading-[1.8] mb-8 font-body">
+              {featuredPost.excerpt}
+            </p>
 
+            {/* Author + CTA */}
             <div className="flex items-center justify-between">
-              <Button 
-                variant="default"
-                iconName="ArrowRight"
-                iconPosition="right"
-              >
-                Continue Reading
-              </Button>
+              <div className="flex items-center gap-2.5">
+                <div className="w-9 h-9 rounded-full bg-primary/80 flex items-center justify-center text-xs font-bold text-primary-foreground">
+                  {featuredPost.authorAvatar}
+                </div>
+                <div>
+                  <p className="text-sm font-semibold text-foreground leading-none mb-0.5">{featuredPost.author}</p>
+                  <p className="text-xs text-muted-foreground">Author</p>
+                </div>
+              </div>
 
-              <div className="flex items-center gap-3">
-                <Button variant="ghost" size="icon">
-                  <Icon name="Heart" size={18} />
-                </Button>
-                <Button variant="ghost" size="icon">
-                  <Icon name="Bookmark" size={18} />
-                </Button>
-                <Button variant="ghost" size="icon">
-                  <Icon name="Share2" size={18} />
-                </Button>
+              <div className="flex items-center gap-2">
+                <button className="btn-ghost-sm" aria-label="Like">
+                  <Icon name="Heart" size={15} />
+                </button>
+                <button className="btn-ghost-sm" aria-label="Bookmark">
+                  <Icon name="Bookmark" size={15} />
+                </button>
+                <Link
+                  to="/discover"
+                  className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-semibold bg-primary text-primary-foreground hover:opacity-90 transition-all duration-200 ml-1"
+                >
+                  Read essay
+                  <Icon name="ArrowRight" size={14} />
+                </Link>
               </div>
             </div>
           </div>
 
-          <div className="order-1 lg:order-2">
-            <div className="relative overflow-hidden rounded-lg shadow-warm">
+          {/* Image column */}
+          <div className="lg:col-span-2 order-1 lg:order-2">
+            <div className="relative overflow-hidden rounded-2xl aspect-[4/5] lg:aspect-[3/4]"
+              style={{ boxShadow: '0 8px 40px -8px rgba(28,20,16,0.2)' }}>
               <Image
-                src={featuredPost?.image}
-                alt={featuredPost?.title}
-                className="w-full h-64 lg:h-80 object-cover transition-transform duration-300 hover:scale-105"
+                src={featuredPost.image}
+                alt={featuredPost.title}
+                className="w-full h-full object-cover transition-transform duration-700 hover:scale-105"
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent"></div>
+              {/* Gradient overlay */}
+              <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent" />
+              {/* Category badge on image */}
+              <div className="absolute top-4 left-4">
+                <span className="badge-dark text-[10px]">{featuredPost.category}</span>
+              </div>
             </div>
           </div>
         </article>

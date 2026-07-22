@@ -18,31 +18,28 @@ const Homepage = () => {
   return (
     <>
       <Helmet>
-        <title>Midnight Thoughts - Where Thoughts Find Their Voice</title>
+        <title>The Longform. - Where Thoughts Find Their Voice</title>
         <meta 
           name="description" 
           content="A sanctuary for intimate reflections, poetry, and essays that emerge in the quiet hours when the world sleeps and souls speak. Join our literary circle." 
         />
-        <meta name="keywords" content="blog, poetry, essays, reflection, writing, midnight thoughts, literature" />
-        <meta property="og:title" content="Midnight Thoughts - Where Thoughts Find Their Voice" />
+        <meta name="keywords" content="blog, poetry, essays, reflection, writing, longform, literature" />
+        <meta property="og:title" content="The Longform. - Where Thoughts Find Their Voice" />
         <meta property="og:description" content="A sanctuary for intimate reflections, poetry, and essays that emerge in the quiet hours." />
         <meta property="og:type" content="website" />
-        <meta property="og:url" content="https://midnightthoughts.com" />
+        <meta property="og:url" content="https://thelongform.com" />
         <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:title" content="Midnight Thoughts" />
+        <meta name="twitter:title" content="The Longform." />
         <meta name="twitter:description" content="A sanctuary for intimate reflections, poetry, and essays." />
-        <link rel="canonical" href="https://midnightthoughts.com" />
+        <link rel="canonical" href="https://thelongform.com" />
       </Helmet>
 
       <div className="min-h-screen bg-background">
         <Header />
         
-        <main className="pt-16 lg:pt-20">
-          {/* Hero Section */}
+        <main className="pt-20 lg:pt-24">
+          {/* Swiss Broadsheet Hero (Cover Essay + Digest) */}
           <HeroSection />
-          
-          {/* Featured Post */}
-          <FeaturedPost />
           
           {/* Main Content Area */}
           <div className="py-12 lg:py-16">
