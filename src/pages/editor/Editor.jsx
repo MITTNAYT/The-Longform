@@ -13,6 +13,7 @@ import {
 } from '../../lib/queries';
 import { MarkdownRenderer } from '../../lib/markdown';
 import Icon from '../../components/AppIcon';
+import { playKeystroke, playBell, playCarriageReturn, setTypewriterAudioEnabled } from '../../utils/typewriterAudio';
 
 // A simple debounce hook/utility
 function useDebounce(value, delay) {
@@ -47,6 +48,10 @@ const Editor = () => {
   const [category, setCategory] = useState('reflection');
   const [tagsInput, setTagsInput] = useState('');
 
+  // Typewriter Mode State
+  const [isTypewriterMode, setIsTypewriterMode] = useState(false);
+  const [typewriterSound, setTypewriterSound] = useState(true);
+
   // Snippets state
   const [snippets, setSnippets] = useState([]);
   const [isSnippetsModalOpen, setIsSnippetsModalOpen] = useState(false);
@@ -55,6 +60,23 @@ const Editor = () => {
   const debouncedTitle = useDebounce(title, 2000);
   const debouncedContent = useDebounce(content, 2000);
   const textareaRef = useRef(null);
+
+  const handleTypewriterKeyDown = (e) => {
+    if (!isTypewriterMode) return;
+    if (typewriterSound) {
+      setTypewriterAudioEnabled(true);
+      if (e.key === 'Enter') {
+        playBell();
+        setTimeout(playCarriageReturn, 120);
+      } else if (e.key === ' ') {
+        playKeystroke('space');
+      } else if (e.key === 'Backspace' || e.key === 'Delete') {
+        playKeystroke('heavy');
+      } else if (e.key.length === 1) {
+        playKeystroke('normal');
+      }
+    }
+  };
 
   // 1. Load or Initialize Draft
   useEffect(() => {
@@ -270,6 +292,42 @@ const Editor = () => {
           <span className="hidden md:inline text-sm font-lato text-stone-500">
             {words} words • {readingTime} min read
           </span>
+
+          {/* Typewriter Mode Button */}
+          <button
+            onClick={() => {
+              const next = !isTypewriterMode;
+              setIsTypewriterMode(next);
+              if (next && typewriterSound) {
+                setTypewriterAudioEnabled(true);
+                playBell();
+              }
+            }}
+            className={`px-3 py-1.5 text-xs font-mono tracking-wider border rounded transition-colors flex items-center gap-1.5 ${
+              isTypewriterMode
+                ? 'bg-stone-900 border-stone-900 text-white'
+                : 'bg-white border-stone-300 text-stone-700 hover:border-stone-900'
+            }`}
+            title="Toggle authentic typewriter manuscript mode with keystroke sounds"
+          >
+            <span>⌨ {isTypewriterMode ? 'Typewriter: ON' : 'Typewriter Mode'}</span>
+          </button>
+
+          {isTypewriterMode && (
+            <button
+              onClick={() => {
+                const next = !typewriterSound;
+                setTypewriterSound(next);
+                setTypewriterAudioEnabled(next);
+                if (next) playBell();
+              }}
+              className="p-1.5 border border-stone-300 rounded bg-white text-stone-700 hover:text-stone-900 text-xs font-mono"
+              title="Toggle Keystroke Audio"
+            >
+              {typewriterSound ? '🔔 Sound' : '🔕 Mute'}
+            </button>
+          )}
+
           <button
             onClick={() => setIsPreview(!isPreview)}
             className="px-3 py-1.5 text-sm font-medium font-lato text-stone-700 bg-white border border-stone-300 rounded hover:bg-stone-50 transition-colors flex items-center"
@@ -287,18 +345,37 @@ const Editor = () => {
       </header>
 
       {/* Editor Area */}
-      <main className="flex-1 max-w-4xl w-full mx-auto p-4 md:p-8 lg:py-12 flex flex-col">
+      <main className={`flex-1 max-w-4xl w-full mx-auto p-4 md:p-8 lg:py-12 flex flex-col transition-all duration-300 ${
+        isTypewriterMode ? 'typewriter-paper my-6 p-8 md:p-12 border border-[#E0D9CE] shadow-sm' : ''
+      }`}>
+        
+        {isTypewriterMode && (
+          <div className="flex items-center justify-between border-b border-[#E0D9CE]/70 pb-3 mb-6 font-mono text-[11px] text-[#78716C] select-none">
+            <span className="uppercase tracking-[0.2em] text-[#9C6B3C]">
+              // TYPEWRITER DESK · MANUSCRIPT DRAFT
+            </span>
+            <span className="uppercase tracking-widest text-[#78716C]">
+              CARRIAGE: ENGAGED
+            </span>
+          </div>
+        )}
+
         <input
           type="text"
           value={title}
           onChange={(e) => setTitle(e.target.value)}
+          onKeyDown={handleTypewriterKeyDown}
           placeholder="New Story Title..."
           readOnly={isPreview}
-          className="text-4xl md:text-5xl font-playfair font-bold text-stone-900 bg-transparent border-none outline-none placeholder-stone-300 w-full mb-8 resize-none"
+          className={`w-full mb-8 resize-none bg-transparent border-none outline-none ${
+            isTypewriterMode 
+              ? 'font-typewriter text-3xl md:text-4xl text-stone-900 typewriter-ink tracking-wide placeholder-stone-400' 
+              : 'text-4xl md:text-5xl font-playfair font-bold text-stone-900 placeholder-stone-300'
+          }`}
         />
 
         {!isPreview && (
-          <div className="sticky top-16 z-10 flex flex-wrap items-center gap-1 p-2 bg-white border border-stone-200 rounded-lg shadow-sm mb-6">
+          <div className="sticky top-16 z-10 flex flex-wrap items-center gap-1 p-2 bg-white/95 backdrop-blur-xs border border-stone-200 rounded-lg shadow-sm mb-6">
             <button onClick={() => insertText('**', '**')} className="p-2 text-stone-600 hover:text-stone-900 hover:bg-stone-100 rounded transition-colors" title="Bold"><Icon name="Bold" size={18} /></button>
             <button onClick={() => insertText('*', '*')} className="p-2 text-stone-600 hover:text-stone-900 hover:bg-stone-100 rounded transition-colors" title="Italic"><Icon name="Italic" size={18} /></button>
             <div className="w-px h-6 bg-stone-200 mx-1"></div>
@@ -317,7 +394,7 @@ const Editor = () => {
         )}
 
         {isPreview ? (
-          <div className="flex-1">
+          <div className={`flex-1 ${isTypewriterMode ? 'font-typewriter typewriter-ink text-base md:text-lg leading-[2.1]' : ''}`}>
             <MarkdownRenderer content={content || '*Nothing to preview yet...*'} />
           </div>
         ) : (
@@ -325,8 +402,13 @@ const Editor = () => {
             ref={textareaRef}
             value={content}
             onChange={(e) => setContent(e.target.value)}
+            onKeyDown={handleTypewriterKeyDown}
             placeholder="Tell your story..."
-            className="flex-1 w-full bg-transparent border-none outline-none resize-none font-lato text-lg text-stone-800 leading-relaxed placeholder-stone-400 min-h-[500px]"
+            className={`flex-1 w-full bg-transparent border-none outline-none resize-none min-h-[500px] ${
+              isTypewriterMode 
+                ? 'font-typewriter typewriter-ink text-base md:text-lg text-stone-900 leading-[2.1] tracking-wide placeholder-stone-400' 
+                : 'font-lato text-lg text-stone-800 leading-relaxed placeholder-stone-400'
+            }`}
           />
         )}
       </main>

@@ -62,19 +62,30 @@ module.exports = {
           DEFAULT: 'var(--color-error)', /* sienna-brown */
           foreground: 'var(--color-error-foreground)', /* near-white */
         },
-        surface: 'var(--color-surface)', /* subtle-warm-gray */
-        'text-primary': 'var(--color-text-primary)', /* rich-dark-brown */
-        'text-secondary': 'var(--color-text-secondary)', /* muted-brown */
+        surface: 'var(--color-surface)',
+        'text-primary': 'var(--color-text-primary)',
+        'text-secondary': 'var(--color-text-secondary)',
+        earth: {
+          clay: 'var(--color-earth-clay)',
+          moss: 'var(--color-earth-moss)',
+          bark: 'var(--color-earth-bark)',
+          sand: 'var(--color-earth-sand)',
+          stone: 'var(--color-earth-stone)',
+          sage: 'var(--color-earth-sage)',
+          dune: 'var(--color-earth-dune)',
+        },
       },
       fontFamily: {
-        'heading': ['Playfair Display', 'Georgia', 'serif'],
-        'body': ['Inter', 'sans-serif'],
-        'lato': ['Inter', 'sans-serif'],
-        'playfair': ['Playfair Display', 'Georgia', 'serif'],
-        'caption': ['Inter', 'sans-serif'],
-        'mono': ['JetBrains Mono', 'monospace'],
-        'sans': ['Inter', 'sans-serif'],
-        'serif': ['Playfair Display', 'Georgia', 'serif'],
+        'heading': ['Lora', 'Georgia', 'serif'],
+        'body': ['DM Sans', 'sans-serif'],
+        'lato': ['DM Sans', 'sans-serif'],
+        'playfair': ['Lora', 'Georgia', 'serif'],
+        'caption': ['DM Sans', 'sans-serif'],
+        'mono': ['DM Mono', 'monospace'],
+        'sans': ['DM Sans', 'sans-serif'],
+        'serif': ['Lora', 'Georgia', 'serif'],
+        'typewriter': ['"Special Elite"', '"Courier Prime"', 'Courier', 'monospace'],
+        'courier': ['"Courier Prime"', '"Special Elite"', 'Courier', 'monospace'],
       },
       fontSize: {
         'fluid-sm': 'clamp(0.875rem, 2vw, 1rem)',

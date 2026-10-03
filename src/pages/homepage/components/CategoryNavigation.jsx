@@ -1,49 +1,53 @@
 import React, { useState } from 'react';
-import Button from '../../../components/ui/Button';
+import { Link } from 'react-router-dom';
 import Icon from '../../../components/AppIcon';
 
 const CategoryNavigation = () => {
   const [selectedCategory, setSelectedCategory] = useState('all');
 
-  const categories = [
-    { id: 'all', name: 'All Posts', count: 24, icon: 'BookOpen' },
-    { id: 'reflection', name: 'Reflection', count: 8, icon: 'Lightbulb' },
-    { id: 'poetry', name: 'Poetry', count: 12, icon: 'Feather' },
-    { id: 'personal', name: 'Personal', count: 6, icon: 'Heart' },
-    { id: 'writing', name: 'Writing', count: 4, icon: 'PenTool' }
+  const topics = [
+    { id: 'all', name: 'All Themes', count: 24 },
+    { id: 'reflection', name: 'Reflections', count: 8 },
+    { id: 'poetry', name: 'Nocturnal Poetry', count: 12 },
+    { id: 'ecology', name: 'Deep Ecology', count: 7 },
+    { id: 'craft', name: 'The Craft of Prose', count: 4 },
+    { id: 'personal', name: 'Personal Histories', count: 6 }
   ];
 
   return (
-    <div className="bg-card border border-border rounded-lg p-6">
-      <h3 className="font-heading font-semibold text-lg text-card-foreground mb-4 flex items-center gap-2">
-        <Icon name="FolderOpen" size={20} />
-        Categories
-      </h3>
-      <nav className="space-y-2">
-        {categories?.map((category) => (
+    <div className="border border-[#E0D9CE] bg-[#FDFCF9] p-6 space-y-5">
+      <div className="flex items-center justify-between pb-3 border-b border-[#E0D9CE]">
+        <h3 className="font-mono text-[11px] uppercase tracking-[0.2em] text-[#1C1917] font-medium">
+          Editorial Themes
+        </h3>
+        <span className="font-mono text-[10px] text-[#9C6B3C]">INDEX</span>
+      </div>
+
+      <nav className="space-y-1">
+        {topics.map((topic) => (
           <button
-            key={category?.id}
-            onClick={() => setSelectedCategory(category?.id)}
-            className={`w-full flex items-center justify-between p-3 rounded-md text-left transition-all duration-200 ${
-              selectedCategory === category?.id
-                ? 'bg-accent/10 text-accent-foreground border border-accent/20'
-                : 'hover:bg-muted/50 text-muted-foreground hover:text-card-foreground'
+            key={topic.id}
+            onClick={() => setSelectedCategory(topic.id)}
+            className={`w-full flex items-center justify-between py-2.5 px-3 font-mono text-xs tracking-wider uppercase transition-colors text-left ${
+              selectedCategory === topic.id
+                ? 'bg-[#EDE8E0] text-[#1C1917] font-semibold'
+                : 'text-[#78716C] hover:text-[#1C1917] hover:bg-[#F3EFE8]'
             }`}
           >
-            <div className="flex items-center gap-3">
-              <Icon name={category?.icon} size={16} />
-              <span className="font-medium">{category?.name}</span>
-            </div>
-            <span className="text-sm bg-muted/50 px-2 py-1 rounded-full">
-              {category?.count}
-            </span>
+            <span>{topic.name}</span>
+            <span className="text-[10px] text-[#A8A29E] font-normal">{topic.count}</span>
           </button>
         ))}
       </nav>
-      <div className="mt-6 pt-6 border-t border-border">
-        <Button variant="ghost" size="sm" className="w-full justify-start" iconName="Archive">
-          View All Archives
-        </Button>
+
+      <div className="pt-3 border-t border-[#E0D9CE]">
+        <Link
+          to="/discover"
+          className="font-mono text-[11px] tracking-widest uppercase text-[#9C6B3C] hover:text-[#1C1917] flex items-center justify-between transition-colors"
+        >
+          <span>Explore Full Index</span>
+          <Icon name="ArrowRight" size={12} />
+        </Link>
       </div>
     </div>
   );

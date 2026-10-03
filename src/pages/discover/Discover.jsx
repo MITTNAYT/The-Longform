@@ -3,7 +3,8 @@ import { Link, useSearchParams } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import { selectUser } from '../../store/authSlice';
 import Icon from '../../components/AppIcon';
-import Button from '../../components/ui/Button';
+import Header from '../../components/ui/Header';
+import Footer from '../homepage/components/Footer';
 import { 
   fetchDiscoverPosts, 
   likePost, 
@@ -23,12 +24,10 @@ const Discover = () => {
   const [cursor, setCursor] = useState(null);
   const [hasMore, setHasMore] = useState(true);
 
-  // Optimistic UI state for likes/bookmarks
   const [likes, setLikes] = useState({});
   const [bookmarks, setBookmarks] = useState({});
 
   useEffect(() => {
-    // Reset state when tag changes
     setPosts([]);
     setCursor(null);
     setHasMore(true);
@@ -87,138 +86,170 @@ const Discover = () => {
     }
   };
 
+  const tags = ["essays", "reflections", "poetry", "ecology", "craft", "philosophy", "personal"];
+
   return (
-    <div className="max-w-5xl mx-auto px-4 py-12 grid grid-cols-1 lg:grid-cols-3 gap-12">
-      {/* Left: Feed Stream */}
-      <main className="lg:col-span-2 space-y-12">
-        <div className="flex items-center justify-between border-b border-border pb-4">
-          <h1 className="font-heading text-2xl font-bold">
-            {currentTag ? `Discover: #${currentTag}` : 'Discover'}
-          </h1>
-          {currentTag && (
-            <Link to="/discover" className="text-sm text-primary hover:underline">
-              Clear filter
-            </Link>
-          )}
+    <div className="min-h-screen bg-[#F8F5F0] text-[#1C1917]">
+      <Header />
+
+      <main className="pt-24 lg:pt-32 pb-20 max-w-7xl mx-auto px-6 lg:px-12">
+        
+        {/* Header bar */}
+        <div className="pb-8 border-b border-[#E0D9CE] mb-12">
+          <span className="font-mono text-[10px] tracking-[0.22em] uppercase text-[#9C6B3C] block mb-2">
+            CATALOGUE & ARCHIVES
+          </span>
+          <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+            <h1 className="font-heading text-3xl sm:text-4xl lg:text-5xl font-normal text-[#1C1917]">
+              {currentTag ? `Topic: #${currentTag.toUpperCase()}` : 'The Discover Archive'}
+            </h1>
+            {currentTag && (
+              <Link to="/discover" className="font-mono text-xs uppercase tracking-wider text-[#9C6B3C] hover:underline">
+                View All Topics →
+              </Link>
+            )}
+          </div>
         </div>
 
-        {isLoading ? (
-          <div className="flex justify-center py-12">
-            <Icon name="RefreshCw" className="animate-spin text-stone-400" size={32} />
-          </div>
-        ) : error ? (
-          <p className="text-red-500">{error}</p>
-        ) : posts.length === 0 ? (
-          <div className="bg-card border border-border/40 rounded-xl p-8 text-center">
-            <h2 className="text-lg font-bold mb-2">No posts found</h2>
-            <p className="text-muted-foreground">Try a different tag or check back later.</p>
-          </div>
-        ) : (
-          <div className="space-y-10">
-            {posts.map((post) => (
-              <article key={post.id} className="group relative bg-card border border-border/40 hover:border-border rounded-xl p-6 lg:p-8 transition-all duration-300 shadow-sm hover:shadow-md">
-                
-                {/* Author Info */}
-                <div className="flex items-center justify-between mb-4">
-                  <Link to={`/profile/${post.author_username}`} className="flex items-center space-x-3">
-                    <img 
-                      src={post.author_avatar || "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=80&h=80"} 
-                      alt={post.author_display_name || post.author_username} 
-                      className="w-10 h-10 rounded-full object-cover filter brightness-95 border border-border"
-                    />
-                    <div>
-                      <h4 className="font-medium text-foreground hover:text-primary transition-colors cursor-pointer">{post.author_display_name || post.author_username}</h4>
-                      <p className="text-xs text-muted-foreground">@{post.author_username} • {new Date(post.published_at).toLocaleDateString()}</p>
-                    </div>
-                  </Link>
-                </div>
-
-                {/* Post Content */}
-                <Link to={`/post/${post.slug}`} className="block group-hover:opacity-95 transition-opacity">
-                  <h2 className="font-heading text-xl lg:text-2xl font-bold text-foreground mb-3 group-hover:text-primary transition-colors">
-                    {post.title}
-                  </h2>
-                  <p className="text-muted-foreground text-sm lg:text-base leading-relaxed mb-4">
-                    {post.excerpt || 'Read the full story...'}
-                  </p>
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16">
+          {/* Main Feed Stream */}
+          <div className="lg:col-span-8 space-y-10">
+            {isLoading ? (
+              <div className="flex justify-center py-20">
+                <span className="font-mono text-xs tracking-widest uppercase text-[#78716C] animate-pulse">
+                  Retrieving archives...
+                </span>
+              </div>
+            ) : error ? (
+              <div className="p-4 border border-[#991B1B]/30 bg-[#991B1B]/5 text-[#991B1B] font-mono text-xs">
+                {error}
+              </div>
+            ) : posts.length === 0 ? (
+              <div className="border border-[#E0D9CE] bg-[#FDFCF9] p-12 text-center space-y-3">
+                <h3 className="font-heading text-xl font-normal text-[#1C1917]">No stories found in this section</h3>
+                <p className="font-body text-xs text-[#78716C]">Explore other topics or clear the active filter.</p>
+                <Link to="/discover" className="inline-block mt-4 px-4 py-2 border border-[#1C1917] font-mono text-xs uppercase tracking-widest text-[#1C1917] hover:bg-[#1C1917] hover:text-[#F8F5F0]">
+                  Reset Archive
                 </Link>
+              </div>
+            ) : (
+              <div className="divide-y divide-[#E0D9CE]">
+                {posts.map((post) => (
+                  <article key={post.id} className="py-8 first:pt-0 group">
+                    <div className="flex items-center justify-between mb-3 font-mono text-[10px] uppercase tracking-wider text-[#78716C]">
+                      <div className="flex items-center gap-2">
+                        <Link to={`/@${post.author_username}`} className="text-[#1C1917] font-medium hover:text-[#9C6B3C]">
+                          {post.author_display_name || post.author_username}
+                        </Link>
+                        <span>·</span>
+                        <span>{new Date(post.published_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</span>
+                      </div>
+                      <span>{post.reading_time || 5} MIN READ</span>
+                    </div>
 
-                {/* Tags and Metadata */}
-                <div className="flex flex-wrap gap-2 mb-6">
-                  {post.tags?.map((tag) => (
-                    <Link to={`/discover?tag=${tag}`} key={tag}>
-                      <span className="text-xs px-2.5 py-1 bg-muted/60 text-muted-foreground rounded-full hover:bg-muted cursor-pointer transition-colors">
-                        #{tag}
-                      </span>
+                    <Link to={`/post/${post.slug}`} className="block mb-3">
+                      <h2 className="font-heading text-xl sm:text-2xl font-normal text-[#1C1917] leading-snug group-hover:text-[#9C6B3C] transition-colors">
+                        {post.title}
+                      </h2>
                     </Link>
-                  ))}
-                </div>
 
-                {/* Actions Footer */}
-                <div className="flex items-center justify-between border-t border-border/30 pt-4 text-sm text-muted-foreground">
-                  <div className="flex items-center space-x-6">
-                    <button 
-                      onClick={() => handleLike(post.id)}
-                      className={`flex items-center gap-1.5 transition-colors ${likes[post.id] ? 'text-red-500' : 'hover:text-foreground'}`}
-                    >
-                      <Icon name="Heart" size={16} fill={likes[post.id] ? "currentColor" : "none"} />
-                    </button>
-                    <Link to={`/post/${post.slug}#comments`} className="flex items-center gap-1.5 hover:text-foreground transition-colors">
-                      <Icon name="MessageSquare" size={16} />
-                    </Link>
-                    <span className="text-xs">{post.reading_time || 1} min read</span>
-                  </div>
-                  
-                  <div className="flex items-center space-x-2">
-                    <button 
-                      onClick={() => handleBookmark(post.id)}
-                      className={`hover:text-foreground p-1 transition-colors ${bookmarks[post.id] ? 'text-primary' : ''}`}
-                    >
-                      <Icon name="Bookmark" size={16} fill={bookmarks[post.id] ? "currentColor" : "none"} />
-                    </button>
-                  </div>
-                </div>
-              </article>
-            ))}
+                    <p className="font-body text-sm text-[#44372A] leading-relaxed mb-4 line-clamp-2">
+                      {post.excerpt || 'Read the full essay...'}
+                    </p>
 
-            {hasMore && (
-              <div className="flex justify-center pt-4">
-                <Button variant="outline" onClick={() => loadPosts(false, currentTag)}>
-                  Load More
-                </Button>
+                    {/* Footer Actions & Tags */}
+                    <div className="flex items-center justify-between pt-2">
+                      <div className="flex flex-wrap gap-1.5">
+                        {post.tags?.map((tag) => (
+                          <Link to={`/discover?tag=${tag}`} key={tag}>
+                            <span className="font-mono text-[10px] uppercase tracking-wider px-2 py-0.5 border border-[#E0D9CE] text-[#78716C] hover:border-[#1C1917] hover:text-[#1C1917] transition-colors">
+                              #{tag}
+                            </span>
+                          </Link>
+                        ))}
+                      </div>
+
+                      <div className="flex items-center gap-4 text-[#78716C]">
+                        <button 
+                          onClick={() => handleLike(post.id)}
+                          className={`hover:text-[#991B1B] transition-colors ${likes[post.id] ? 'text-[#991B1B]' : ''}`}
+                        >
+                          <Icon name="Heart" size={14} className={likes[post.id] ? 'fill-current' : ''} />
+                        </button>
+                        <button 
+                          onClick={() => handleBookmark(post.id)}
+                          className={`hover:text-[#9C6B3C] transition-colors ${bookmarks[post.id] ? 'text-[#9C6B3C]' : ''}`}
+                        >
+                          <Icon name="Bookmark" size={14} className={bookmarks[post.id] ? 'fill-current' : ''} />
+                        </button>
+                      </div>
+                    </div>
+                  </article>
+                ))}
+
+                {hasMore && (
+                  <div className="pt-8 text-center">
+                    <button
+                      onClick={() => loadPosts(false, currentTag)}
+                      className="px-8 py-3 border border-[#1C1917] font-mono text-xs uppercase tracking-widest text-[#1C1917] hover:bg-[#1C1917] hover:text-[#F8F5F0] transition-colors"
+                    >
+                      Load More Stories
+                    </button>
+                  </div>
+                )}
               </div>
             )}
           </div>
-        )}
+
+          {/* Right Sidebar */}
+          <aside className="lg:col-span-4 space-y-8">
+            <div className="border border-[#E0D9CE] bg-[#FDFCF9] p-6 space-y-4">
+              <span className="font-mono text-[10px] uppercase tracking-[0.2em] text-[#9C6B3C] block">
+                CURATED INDEX
+              </span>
+              <h3 className="font-heading text-lg font-normal text-[#1C1917]">
+                Featured Themes
+              </h3>
+              <div className="flex flex-wrap gap-2 pt-2">
+                {tags.map((tag) => (
+                  <Link to={`/discover?tag=${tag}`} key={tag}>
+                    <span className={`font-mono text-xs uppercase tracking-wider px-3 py-1.5 border transition-all ${
+                      currentTag === tag
+                        ? 'border-[#1C1917] bg-[#1C1917] text-[#F8F5F0]'
+                        : 'border-[#E0D9CE] text-[#78716C] hover:border-[#1C1917] hover:text-[#1C1917]'
+                    }`}>
+                      #{tag}
+                    </span>
+                  </Link>
+                ))}
+              </div>
+            </div>
+
+            {!user && (
+              <div className="border border-[#E0D9CE] bg-[#F3EFE8] p-6 space-y-3">
+                <span className="font-mono text-[10px] tracking-[0.2em] uppercase text-[#78716C] block">
+                  COMMUNITY
+                </span>
+                <h3 className="font-heading text-xl font-normal text-[#1C1917]">
+                  Publish with Us
+                </h3>
+                <p className="font-body text-xs text-[#78716C] leading-relaxed">
+                  Join a community of thoughtful essayists, poets, and cultural critics.
+                </p>
+                <Link
+                  to="/auth/signup"
+                  className="block text-center w-full py-2.5 bg-[#1C1917] text-[#F8F5F0] font-mono text-xs uppercase tracking-widest hover:bg-[#44372A] transition-colors"
+                >
+                  Create an Account
+                </Link>
+              </div>
+            )}
+          </aside>
+        </div>
+
       </main>
 
-      {/* Right Sidebar */}
-      <aside className="space-y-8 hidden lg:block">
-        {!user && (
-          <div className="bg-card border border-border/50 rounded-xl p-6">
-            <h3 className="font-heading text-lg font-bold mb-3">Join The Longform</h3>
-            <p className="text-sm text-muted-foreground leading-relaxed mb-4">
-              Create an account to follow writers, save posts, and publish your own work.
-            </p>
-            <Link to="/auth/signup">
-              <Button fullWidth>Get Started</Button>
-            </Link>
-          </div>
-        )}
-
-        <div className="space-y-4">
-          <h3 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">Topics to explore</h3>
-          <div className="flex flex-wrap gap-2">
-            {["reflection", "poetry", "personal", "writing", "culture"].map((tag) => (
-              <Link to={`/discover?tag=${tag}`} key={tag}>
-                <span className="text-xs px-3 py-1 bg-card border border-border/60 text-foreground rounded-full hover:bg-muted hover:border-primary/30 transition-all cursor-pointer">
-                  #{tag}
-                </span>
-              </Link>
-            ))}
-          </div>
-        </div>
-      </aside>
+      <Footer />
     </div>
   );
 };

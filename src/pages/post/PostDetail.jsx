@@ -11,6 +11,7 @@ import {
 } from '../../lib/queries';
 import { MarkdownRenderer } from '../../lib/markdown';
 import Icon from '../../components/AppIcon';
+import { playBell, setTypewriterAudioEnabled } from '../../utils/typewriterAudio';
 
 // ─── Like Button ─────────────────────────────────────────────
 const LikeButton = ({ postId, userId }) => {
@@ -45,15 +46,15 @@ const LikeButton = ({ postId, userId }) => {
   return (
     <button
       onClick={handleToggle}
-      className={`flex items-center gap-2 px-4 py-2 rounded-full border text-sm font-medium font-lato transition-all duration-200 ${
+      className={`flex items-center gap-2 px-4 py-2 border font-mono text-xs uppercase tracking-wider transition-all duration-200 ${
         liked
-          ? 'bg-rose-50 border-rose-200 text-rose-600'
-          : 'border-stone-200 text-stone-600 hover:border-rose-200 hover:text-rose-500'
+          ? 'bg-[#9C6B3C] border-[#9C6B3C] text-[#F8F5F0]'
+          : 'border-[#E0D9CE] text-[#1C1917] hover:border-[#1C1917]'
       }`}
     >
-      <Icon name={liked ? 'Heart' : 'Heart'} size={16} className={liked ? 'fill-rose-500 text-rose-500' : ''} />
+      <Icon name="Heart" size={14} className={liked ? 'fill-current' : ''} />
       {count > 0 && <span>{count}</span>}
-      <span>{liked ? 'Liked' : 'Like'}</span>
+      <span>{liked ? 'Applauded' : 'Applaud'}</span>
     </button>
   );
 };
@@ -83,13 +84,13 @@ const BookmarkButton = ({ postId, userId }) => {
   return (
     <button
       onClick={handleToggle}
-      className={`flex items-center gap-2 px-4 py-2 rounded-full border text-sm font-medium font-lato transition-all duration-200 ${
+      className={`flex items-center gap-2 px-4 py-2 border font-mono text-xs uppercase tracking-wider transition-all duration-200 ${
         saved
-          ? 'bg-amber-50 border-amber-200 text-amber-600'
-          : 'border-stone-200 text-stone-600 hover:border-amber-200 hover:text-amber-500'
+          ? 'bg-[#1C1917] border-[#1C1917] text-[#F8F5F0]'
+          : 'border-[#E0D9CE] text-[#1C1917] hover:border-[#1C1917]'
       }`}
     >
-      <Icon name="Bookmark" size={16} className={saved ? 'fill-amber-500 text-amber-500' : ''} />
+      <Icon name="Bookmark" size={14} className={saved ? 'fill-current' : ''} />
       <span>{saved ? 'Saved' : 'Save'}</span>
     </button>
   );
@@ -256,6 +257,8 @@ const PostDetail = () => {
   const [post, setPost] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [typewriterMode, setTypewriterMode] = useState(false);
+  const [soundOn, setSoundOn] = useState(false);
 
   const isFollowing = useSelector(state =>
     post?.author_id ? selectIsFollowing(state, post.author_id) : false
@@ -438,125 +441,160 @@ Thank you for reading this issue on The Longform.`
     : '';
 
   return (
-    <div className="min-h-screen bg-background text-foreground">
-      {/* Minimal Top Bar */}
-      <header className="sticky top-0 z-40 bg-background/80 backdrop-blur-md border-b border-border/50 py-3">
-        <div className="max-w-3xl mx-auto px-4 flex items-center justify-between">
-          <Link to={currentUser ? '/feed' : '/discover'} className="font-heading text-xl font-black text-foreground hover:opacity-80 transition-opacity">
-            The <span className="text-primary">Longform</span>
+    <div className="min-h-screen bg-[#F8F5F0] text-[#1C1917]">
+      {/* Minimal Top Masthead */}
+      <header className="sticky top-0 z-40 bg-[#F8F5F0]/95 backdrop-blur-md border-b border-[#E0D9CE] py-3.5">
+        <div className="max-w-4xl mx-auto px-6 flex items-center justify-between">
+          <Link to="/" className="font-heading text-xl font-normal text-[#1C1917] hover:opacity-80 transition-opacity">
+            The Longform<span className="text-[#9C6B3C]">.</span>
           </Link>
           <div className="flex items-center gap-3">
+            {/* Typewriter Mode Button */}
+            <button
+              onClick={() => {
+                const next = !typewriterMode;
+                setTypewriterMode(next);
+                if (next) {
+                  playBell();
+                }
+              }}
+              className={`flex items-center gap-2 px-3 py-1.5 border text-xs font-mono tracking-wider transition-colors duration-200 ${
+                typewriterMode
+                  ? 'bg-[#1C1917] border-[#1C1917] text-[#F8F5F0]'
+                  : 'border-[#E0D9CE] text-[#78716C] hover:border-[#1C1917] hover:text-[#1C1917]'
+              }`}
+              title="Toggle vintage typewriter manuscript format"
+            >
+              <span>⌨ {typewriterMode ? 'Typewriter: ON' : 'Typewriter Mode'}</span>
+            </button>
+
             <BookmarkButton postId={post.id} userId={currentUser?.id} />
             {currentUser ? (
-              <Link to={`/@${currentUser.username}`}>
+              <Link to={`/@${currentUser.username}`} className="flex items-center gap-2">
                 <img
-                  src={currentUser.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(currentUser.display_name || currentUser.username)}&background=random`}
+                  src={currentUser.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(currentUser.display_name || currentUser.username)}&background=EDE8E0&color=1C1917`}
                   alt="Profile"
-                  className="w-8 h-8 rounded-full border border-border ring-2 ring-primary/20"
+                  className="w-7 h-7 border border-[#E0D9CE] object-cover"
                 />
               </Link>
             ) : (
-              <Link to="/auth/login" className="text-sm font-medium text-stone-600 hover:text-stone-900 font-lato">Sign in</Link>
+              <Link to="/auth/login" className="font-mono text-xs uppercase tracking-wider text-[#78716C] hover:text-[#1C1917]">
+                Sign In
+              </Link>
             )}
           </div>
         </div>
       </header>
 
-      {/* Article */}
-      <article className="max-w-3xl mx-auto px-4 py-10 md:py-16">
+      {/* Article Content */}
+      <article className={`max-w-3xl mx-auto px-6 py-12 md:py-20 transition-all duration-300 ${
+        typewriterMode ? 'typewriter-paper my-8 md:my-14 p-8 sm:p-14 border border-[#E0D9CE]' : ''
+      }`}>
+
+        {/* Vintage Stamped Manuscript Folio when in Typewriter Mode */}
+        {typewriterMode && (
+          <div className="flex items-center justify-between border-b border-[#E0D9CE]/70 pb-4 mb-8 font-mono text-[11px] text-[#78716C]">
+            <span className="uppercase tracking-[0.25em] text-[#9C6B3C]">
+              // MANUSCRIPT ARCHIVE · ISSUE IV NOCTURNES
+            </span>
+            <span className="uppercase tracking-widest text-[#78716C]">
+              RIBBON: INKED
+            </span>
+          </div>
+        )}
 
         {/* Category + Tags */}
-        <div className="flex flex-wrap gap-2 mb-6">
+        <div className="flex flex-wrap items-center gap-2 mb-6">
           {post.category && (
-            <span className="px-2.5 py-1 bg-muted rounded text-xs uppercase font-bold tracking-wider text-muted-foreground">
+            <span className={`font-mono text-[10px] tracking-[0.22em] uppercase ${typewriterMode ? 'text-[#9C6B3C] font-bold' : 'text-[#9C6B3C] font-semibold'}`}>
               {post.category}
             </span>
           )}
           {post.tags?.map(tag => (
-            <span key={tag} className="px-2.5 py-1 bg-muted/60 border border-border/50 rounded-full text-xs text-muted-foreground font-lato">
+            <span key={tag} className="font-mono text-[10px] tracking-wider uppercase text-[#78716C] border border-[#E0D9CE] px-2 py-0.5">
               #{tag}
             </span>
           ))}
         </div>
 
         {/* Title */}
-        <h1 className="font-heading text-4xl md:text-5xl font-black leading-tight mb-6 text-foreground">
+        <h1 className={`${
+          typewriterMode 
+            ? 'font-typewriter text-3xl sm:text-4xl leading-[1.25] tracking-wide typewriter-ink text-[#1C1917]' 
+            : 'font-heading text-3xl sm:text-4xl lg:text-5xl font-normal leading-[1.2] tracking-tight text-[#1C1917]'
+        } mb-8`}>
           {post.title}
         </h1>
 
         {/* Author Row */}
-        <div className="flex items-center justify-between flex-wrap gap-4 mb-10 pb-8 border-b border-border/40">
-          <Link to={`/@${post.author_username}`} className="flex items-center gap-3 group">
-            <img src={authorAvatar} alt={post.author_display_name} className="w-10 h-10 rounded-full object-cover" />
+        <div className="flex items-center justify-between flex-wrap gap-4 mb-12 pb-8 border-b border-[#E0D9CE]">
+          <Link to={`/@${post.author_username}`} className="flex items-center gap-3.5 group">
+            <img src={authorAvatar} alt={post.author_display_name} className="w-11 h-11 border border-[#E0D9CE] object-cover" />
             <div>
-              <p className="font-medium text-foreground group-hover:text-primary transition-colors font-lato">
+              <p className={`text-base font-normal text-[#1C1917] group-hover:text-[#9C6B3C] transition-colors ${typewriterMode ? 'font-typewriter' : 'font-heading'}`}>
                 {post.author_display_name || post.author_username}
               </p>
-              <p className="text-xs text-muted-foreground font-lato">{publishedDate} · {post.reading_time || 1} min read</p>
+              <p className="font-mono text-[11px] text-[#78716C] tracking-wide">
+                {publishedDate} · {post.reading_time || 1} min read
+              </p>
             </div>
           </Link>
           {currentUser && currentUser.id !== post.author_id && (
             <button
               onClick={handleFollowAuthor}
               disabled={isTogglingFollow}
-              className={`px-4 py-1.5 rounded-full text-sm font-medium font-lato border transition-all duration-200 ${
+              className={`px-4 py-2 font-mono text-xs uppercase tracking-widest border transition-all duration-200 ${
                 isFollowing
-                  ? 'border-stone-300 text-stone-600 hover:border-red-200 hover:text-red-500'
-                  : 'border-stone-900 bg-stone-900 text-white hover:bg-stone-700'
+                  ? 'border-[#E0D9CE] text-[#78716C] hover:border-[#991B1B] hover:text-[#991B1B]'
+                  : 'border-[#1C1917] bg-[#1C1917] text-[#F8F5F0] hover:bg-[#44372A]'
               }`}
             >
-              {isFollowing ? 'Following' : 'Follow'}
+              {isFollowing ? 'Subscribed' : 'Subscribe'}
             </button>
           )}
         </div>
 
-        {/* Content */}
-        <MarkdownRenderer content={post.content || ''} />
+        {/* Reading Body */}
+        <div className={`${typewriterMode ? 'font-typewriter typewriter-ink text-base sm:text-lg leading-[2.1] tracking-wide' : 'prose prose-editorial'}`}>
+          <MarkdownRenderer content={post.content || ''} />
+        </div>
 
         {/* Engagement Bar */}
-        <div className="flex items-center gap-3 mt-12 pt-8 border-t border-border/40 flex-wrap">
+        <div className="flex items-center gap-3 mt-14 pt-8 border-t border-[#E0D9CE] flex-wrap">
           <LikeButton postId={post.id} userId={currentUser?.id} />
           <BookmarkButton postId={post.id} userId={currentUser?.id} />
           <button
             onClick={() => {
               navigator.clipboard.writeText(window.location.href);
-              alert('Link copied!');
+              alert('Link copied to clipboard');
             }}
-            className="flex items-center gap-2 px-4 py-2 rounded-full border border-stone-200 text-stone-600 hover:border-stone-400 text-sm font-medium font-lato transition-all"
+            className="flex items-center gap-2 px-4 py-2 border border-[#E0D9CE] font-mono text-xs uppercase tracking-wider text-[#1C1917] hover:border-[#1C1917] transition-all"
           >
-            <Icon name="Share2" size={16} />
+            <Icon name="Share2" size={14} />
             Share
           </button>
         </div>
 
-        {/* Author Card */}
-        <div className="mt-12 p-6 bg-muted/20 border border-border/40 rounded-xl flex flex-col sm:flex-row items-start gap-4">
-          <img src={authorAvatar} alt={post.author_display_name} className="w-14 h-14 rounded-full object-cover flex-shrink-0" />
-          <div className="flex-1 min-w-0">
-            <Link to={`/@${post.author_username}`} className="font-heading font-bold text-xl text-foreground hover:text-primary transition-colors block mb-1">
+        {/* Author Bio Box */}
+        <div className="mt-14 p-8 border border-[#E0D9CE] bg-[#FDFCF9] flex flex-col sm:flex-row items-start gap-6">
+          <img src={authorAvatar} alt={post.author_display_name} className="w-14 h-14 border border-[#E0D9CE] object-cover flex-shrink-0" />
+          <div className="flex-1 min-w-0 space-y-2">
+            <span className="font-mono text-[10px] tracking-[0.2em] uppercase text-[#9C6B3C] block">
+              WRITER & ESSAYIST
+            </span>
+            <Link to={`/@${post.author_username}`} className="font-heading text-xl font-normal text-[#1C1917] hover:text-[#9C6B3C] transition-colors block">
               {post.author_display_name || post.author_username}
             </Link>
-            <p className="text-sm text-muted-foreground font-lato mb-4 leading-relaxed">
-              {post.author_bio || 'Writer on The Longform.'}
+            <p className="font-body text-xs text-[#78716C] leading-relaxed">
+              {post.author_bio || 'Independent contributor writing for The Longform.'}
             </p>
-            {currentUser && currentUser.id !== post.author_id && (
-              <button
-                onClick={handleFollowAuthor}
-                disabled={isTogglingFollow}
-                className={`px-5 py-2 rounded-full text-sm font-medium font-lato border transition-all duration-200 ${
-                  isFollowing
-                    ? 'border-stone-300 text-stone-600'
-                    : 'border-stone-900 bg-stone-900 text-white hover:bg-stone-700'
-                }`}
-              >
-                {isFollowing ? 'Following' : 'Follow'}
-              </button>
-            )}
           </div>
         </div>
 
-        {/* Comments */}
-        <CommentsSection postId={post.id} currentUser={currentUser} />
+        {/* Comments Section */}
+        <div className="mt-14 pt-10 border-t border-[#E0D9CE]">
+          <CommentsSection postId={post.id} currentUser={currentUser} />
+        </div>
       </article>
     </div>
   );

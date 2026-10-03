@@ -1,7 +1,6 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import Image from '../../../components/AppImage';
-import Button from '../../../components/ui/Button';
-import Icon from '../../../components/AppIcon';
 
 const RecentComments = () => {
   const recentComments = [
@@ -9,82 +8,69 @@ const RecentComments = () => {
       id: 1,
       author: "Sarah Chen",
       avatar: "https://randomuser.me/api/portraits/women/32.jpg",
-      comment: "Your words about solitude really resonated with me. Thank you for sharing such intimate thoughts.",
+      comment: "Your words about solitude really resonated with me. Finding quiet in this restless city is a daily practice.",
       postTitle: "The Art of Solitude",
-      timestamp: "2 hours ago"
+      postSlug: "art-of-solitude",
+      timestamp: "2h ago"
     },
     {
       id: 2,
-      author: "Michael Rodriguez",
+      author: "Michael Vance",
       avatar: "https://randomuser.me/api/portraits/men/45.jpg",
-      comment: "This poem brought tears to my eyes. The imagery of dancing with shadows is so powerful.",
-      postTitle: "Dancing with Shadows",
-      timestamp: "5 hours ago"
+      comment: "The passage on reclaiming attention struck a deep chord. We need more writing with this pace.",
+      postTitle: "Reclaiming Attention",
+      postSlug: "reclaiming-attention",
+      timestamp: "5h ago"
     },
     {
       id: 3,
-      author: "Emma Thompson",
+      author: "Elena Rostova",
       avatar: "https://randomuser.me/api/portraits/women/28.jpg",
-      comment: "I\'ve been following your writing for months now. Each piece feels like a conversation with a dear friend.",
+      comment: "Each edition feels like an unhurried letter from an observant friend.",
       postTitle: "Letters to My Younger Self",
-      timestamp: "1 day ago"
-    },
-    {
-      id: 4,
-      author: "David Park",
-      avatar: "https://randomuser.me/api/portraits/men/33.jpg",
-      comment: "Your perspective on letting go has helped me through a difficult time. Thank you.",
-      postTitle: "The Art of Letting Go",
-      timestamp: "2 days ago"
+      postSlug: "letters-to-my-younger-self",
+      timestamp: "1d ago"
     }
   ];
 
   return (
-    <div className="bg-card border border-border rounded-lg p-6">
-      <h3 className="font-heading font-semibold text-lg text-card-foreground mb-4 flex items-center gap-2">
-        <Icon name="MessageCircle" size={20} />
-        Recent Comments
-      </h3>
-      <div className="space-y-4">
-        {recentComments?.map((comment) => (
-          <div key={comment?.id} className="flex gap-3 p-3 rounded-lg hover:bg-muted/30 transition-colors duration-200">
-            <div className="flex-shrink-0">
-              <Image
-                src={comment?.avatar}
-                alt={comment?.author}
-                className="w-8 h-8 rounded-full object-cover"
-              />
-            </div>
-            
-            <div className="flex-1 min-w-0">
-              <div className="flex items-center gap-2 mb-1">
-                <span className="font-medium text-sm text-card-foreground truncate">
-                  {comment?.author}
-                </span>
-                <span className="text-xs text-muted-foreground">
-                  {comment?.timestamp}
-                </span>
+    <div className="border border-[#E0D9CE] bg-[#FDFCF9] p-6 space-y-4">
+      <div className="flex items-center justify-between pb-3 border-b border-[#E0D9CE]">
+        <h3 className="font-mono text-[11px] uppercase tracking-[0.2em] text-[#1C1917] font-medium">
+          Reader Dialogues
+        </h3>
+        <span className="font-mono text-[10px] text-[#78716C]">VOICES</span>
+      </div>
+
+      <div className="space-y-4 divide-y divide-[#EDE8E0]">
+        {recentComments.map((item) => (
+          <div key={item.id} className="pt-3 first:pt-0 space-y-2">
+            <div className="flex items-center justify-between font-mono text-[10px] text-[#78716C]">
+              <div className="flex items-center gap-2">
+                <div className="w-5 h-5 overflow-hidden border border-[#E0D9CE] bg-[#EDE8E0]">
+                  <Image
+                    src={item.avatar}
+                    alt={item.author}
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+                <span className="text-[#1C1917] font-medium">{item.author}</span>
               </div>
-              
-              <p className="text-sm text-muted-foreground mb-2 line-clamp-2">
-                {comment?.comment}
-              </p>
-              
-              <Button 
-                variant="ghost" 
-                size="sm" 
-                className="text-xs h-auto p-1 text-accent hover:text-accent-foreground"
-              >
-                on "{comment?.postTitle}"
-              </Button>
+              <span>{item.timestamp}</span>
             </div>
+
+            <p className="font-body text-xs text-[#44372A] leading-relaxed italic">
+              "{item.comment}"
+            </p>
+
+            <Link
+              to={`/post/${item.postSlug}`}
+              className="font-mono text-[10px] tracking-wider uppercase text-[#9C6B3C] hover:underline block"
+            >
+              on {item.postTitle} →
+            </Link>
           </div>
         ))}
-      </div>
-      <div className="mt-6 pt-6 border-t border-border">
-        <Button variant="ghost" size="sm" className="w-full justify-start" iconName="MessageSquare">
-          View All Comments
-        </Button>
       </div>
     </div>
   );
